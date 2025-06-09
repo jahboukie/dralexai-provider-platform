@@ -488,3 +488,99 @@ footer {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
+
+/* Patient Apps Section */
+.app-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 2px solid #e5e7eb;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.app-card:hover {
+    border-color: var(--ai-blue);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.app-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.app-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.feature-tag {
+    background: #f0f9ff;
+    color: var(--ai-blue);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.app-status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.app-status-badge.active {
+    background: #22c55e;
+    color: white;
+}
+
+.app-status-badge.coming-soon {
+    background: #f59e0b;
+    color: white;
+}
+
+.app-status-badge.future {
+    background: #8b5cf6;
+    color: white;
+}
+
+.app-card {
+    position: relative;
+}
+
+.app-card.active {
+    border-color: #22c55e;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.app-card.coming-soon {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+    opacity: 0.9;
+}
+
+.app-card.future {
+    border-color: #8b5cf6;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
+    opacity: 0.8;
+}
+
+.app-card.coming-soon .app-icon,
+.app-card.future .app-icon {
+    opacity: 0.7;
+}
+
+.app-card button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

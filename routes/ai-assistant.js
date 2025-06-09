@@ -122,7 +122,7 @@ async function processAIRequest(message, context, tierInfo, providerId) {
   }
 }
 
-// Call Claude AI API
+// Call Claude AI API with Sentiment Analysis Integration
 async function callClaudeAI(message, context, tierInfo, providerId) {
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
   
@@ -130,7 +130,36 @@ async function callClaudeAI(message, context, tierInfo, providerId) {
     throw new Error('Anthropic API key not configured');
   }
 
-  const systemPrompt = `You are Dr. Alex AI, a clinical intelligence assistant for healthcare providers. 
+  // Get sentiment analysis context from main brain if available
+  let sentimentContext = '';
+  try {
+    const sentimentServiceUrl = process.env.SENTIMENT_SERVICE_URL || 'http://localhost:3005';
+    const sentimentResponse = await fetch(`${sentimentServiceUrl}/api/sentiment/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Service': process.env.INTERNAL_SERVICE_KEY || 'dev-key'
+      },
+      body: JSON.stringify({
+        text: message,
+        healthcareContext: true,
+        includeEmotions: true
+      })
+    });
+    
+    if (sentimentResponse.ok) {
+      const sentimentData = await sentimentResponse.json();
+      sentimentContext = `\n\nSentiment Analysis Context:
+- Patient/Provider sentiment: ${sentimentData.sentiment?.category || 'neutral'}
+- Emotional indicators: ${sentimentData.emotions ? Object.keys(sentimentData.emotions).join(', ') : 'none detected'}
+- Healthcare context relevance: High
+This context should inform your clinical recommendations.`;
+    }
+  } catch (error) {
+    console.log('Sentiment service unavailable, proceeding without context');
+  }
+
+  const systemPrompt = `You are Dr. Alex AI, a clinical intelligence assistant for healthcare providers integrated with ecosystem sentiment analysis brain.
 
 Current provider tier: ${tierInfo.price === 2999 ? 'Essential' : tierInfo.price === 9999 ? 'Professional' : 'Enterprise'}
 
@@ -139,13 +168,16 @@ Capabilities for this tier:
 - Professional ($9,999/month): Full EHR integration, advanced predictive analytics, treatment optimization  
 - Enterprise ($19,999/month): Unlimited queries, hospital-wide crisis detection, custom AI training
 
+Data Integration: You have access to aggregated sentiment analysis and patient outcome correlations from the ecosystem's main analytical brain.
+
 Always provide:
 1. Clinical insights based on the provider's question
-2. Actionable recommendations
+2. Actionable recommendations enhanced by sentiment analysis
 3. Risk assessments when relevant
 4. Crisis detection if emergency indicators present
+5. Patient emotional state considerations when relevant
 
-Be professional, accurate, and focus on improving patient outcomes.`;
+Be professional, accurate, and focus on improving patient outcomes through comprehensive data integration.${sentimentContext}`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

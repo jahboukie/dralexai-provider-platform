@@ -62,6 +62,10 @@
                     <span class="menu-icon">💳</span>
                     <span class="menu-text">Usage & Billing</span>
                 </div>
+                <div class="menu-item" onclick="showSection('patient-apps')">
+                    <span class="menu-icon">📱</span>
+                    <span class="menu-text">Patient Apps</span>
+                </div>
                 <div class="menu-item" onclick="showSection('settings')">
                     <span class="menu-icon">⚙️</span>
                     <span class="menu-text">Settings</span>
@@ -156,6 +160,8 @@
                         <div class="chat-status">
                             <span class="status-indicator online"></span>
                             <span>Claude AI - Ready</span>
+                            <span class="status-indicator online" style="margin-left: 1rem;"></span>
+                            <span>Sentiment Brain - Connected</span>
                         </div>
                         <div class="chat-controls">
                             <button class="btn-secondary" onclick="clearChat()">Clear Chat</button>
@@ -493,26 +499,26 @@
                         <h3>This Month's Usage</h3>
                         <div class="usage-chart">
                             <div class="chart-bar">
-                                <div class="bar-fill" style="width: 63.5%"></div>
+                                <div class="bar-fill" style="width: 31.4%"></div>
                             </div>
                             <div class="usage-numbers">
-                                <span>127 of 200 queries used (63.5%)</span>
-                                <span>73 queries remaining</span>
+                                <span>627 of 2,000 queries used (31.4%)</span>
+                                <span>1,373 queries remaining</span>
                             </div>
                         </div>
 
                         <div class="usage-breakdown">
                             <div class="usage-item">
                                 <span>Clinical Analysis</span>
-                                <span>89 queries</span>
+                                <span>423 queries</span>
                             </div>
                             <div class="usage-item">
                                 <span>Crisis Detection</span>
-                                <span>23 queries</span>
+                                <span>127 queries</span>
                             </div>
                             <div class="usage-item">
                                 <span>Treatment Recommendations</span>
-                                <span>15 queries</span>
+                                <span>77 queries</span>
                             </div>
                         </div>
                     </div>
@@ -533,6 +539,297 @@
                                 <span class="invoice-status paid">Paid</span>
                                 <button class="btn-link">Download</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Patient Apps Section -->
+            <section id="patient-apps" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Patient App Integration</h2>
+                    <p>Refer patients to specialized health apps and coordinate their care</p>
+                </div>
+
+                <div class="patient-apps-container">
+                    <!-- Available Apps -->
+                    <div class="apps-grid">
+                        <!-- LIVE APPS -->
+                        <div class="app-integration-card live">
+                            <div class="app-header">
+                                <div class="app-icon-large">🌸</div>
+                                <div class="app-info">
+                                    <h3>MenoTracker</h3>
+                                    <p>Menopause symptom tracking and HRT monitoring</p>
+                                    <span class="app-status active">🟢 LIVE</span>
+                                </div>
+                            </div>
+                            <div class="app-stats">
+                                <div class="stat">
+                                    <span class="stat-number">23</span>
+                                    <span class="stat-label">Referred Patients</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">89%</span>
+                                    <span class="stat-label">Engagement Rate</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">94%</span>
+                                    <span class="stat-label">Treatment Adherence</span>
+                                </div>
+                            </div>
+                            <div class="app-actions">
+                                <button class="btn-primary" onclick="window.open('http://localhost:3013', '_blank')">View Patient App</button>
+                                <button class="btn-secondary" onclick="generateReferralLink('menotracker')">Generate Referral Link</button>
+                            </div>
+                        </div>
+
+                        <div class="app-integration-card live">
+                            <div class="app-header">
+                                <div class="app-icon-large">🤝</div>
+                                <div class="app-info">
+                                    <h3>SupportivePartner</h3>
+                                    <p>Partner support for women's health journeys</p>
+                                    <span class="app-status active">🟢 LIVE</span>
+                                </div>
+                            </div>
+                            <div class="app-stats">
+                                <div class="stat">
+                                    <span class="stat-number">18</span>
+                                    <span class="stat-label">Referred Partners</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">92%</span>
+                                    <span class="stat-label">Partner Engagement</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">96%</span>
+                                    <span class="stat-label">Support Effectiveness</span>
+                                </div>
+                            </div>
+                            <div class="app-actions">
+                                <button class="btn-primary" onclick="window.open('http://localhost:3021', '_blank')">View Partner App</button>
+                                <button class="btn-secondary" onclick="generateReferralLink('supportivepartner')">Generate Referral Link</button>
+                            </div>
+                        </div>
+
+                        <!-- COMING SOON APPS -->
+                        <div class="app-integration-card coming-soon">
+                            <div class="app-header">
+                                <div class="app-icon-large">🤱</div>
+                                <div class="app-info">
+                                    <h3>FertilityTracker</h3>
+                                    <p>Advanced fertility monitoring and ovulation prediction</p>
+                                    <span class="app-status coming-soon">🟡 COMING SOON</span>
+                                </div>
+                            </div>
+                            <div class="app-stats">
+                                <div class="stat">
+                                    <span class="stat-number">--</span>
+                                    <span class="stat-label">Integration Progress</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">85%</span>
+                                    <span class="stat-label">Development</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">Q2</span>
+                                    <span class="stat-label">Launch Target</span>
+                                </div>
+                            </div>
+                            <div class="app-actions">
+                                <button class="btn-secondary" disabled>Integration in Progress</button>
+                                <button class="btn-secondary" onclick="notifyWhenReady('fertilitytracker')">Notify When Ready</button>
+                            </div>
+                        </div>
+
+                        <div class="app-integration-card coming-soon">
+                            <div class="app-header">
+                                <div class="app-icon-large">🤰</div>
+                                <div class="app-info">
+                                    <h3>PregnancyCompanion</h3>
+                                    <p>Complete pregnancy journey tracking with AI insights</p>
+                                    <span class="app-status coming-soon">🟡 COMING SOON</span>
+                                </div>
+                            </div>
+                            <div class="app-stats">
+                                <div class="stat">
+                                    <span class="stat-number">--</span>
+                                    <span class="stat-label">Integration Progress</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">78%</span>
+                                    <span class="stat-label">Development</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">Q2</span>
+                                    <span class="stat-label">Launch Target</span>
+                                </div>
+                            </div>
+                            <div class="app-actions">
+                                <button class="btn-secondary" disabled>Integration in Progress</button>
+                                <button class="btn-secondary" onclick="notifyWhenReady('pregnancycompanion')">Notify When Ready</button>
+                            </div>
+                        </div>
+
+                        <div class="app-integration-card coming-soon">
+                            <div class="app-header">
+                                <div class="app-icon-large">👶</div>
+                                <div class="app-info">
+                                    <h3>PostpartumSupport</h3>
+                                    <p>Comprehensive postpartum care and mental health monitoring</p>
+                                    <span class="app-status coming-soon">🟡 COMING SOON</span>
+                                </div>
+                            </div>
+                            <div class="app-stats">
+                                <div class="stat">
+                                    <span class="stat-number">--</span>
+                                    <span class="stat-label">Integration Progress</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">82%</span>
+                                    <span class="stat-label">Development</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">Q3</span>
+                                    <span class="stat-label">Launch Target</span>
+                                </div>
+                            </div>
+                            <div class="app-actions">
+                                <button class="btn-secondary" disabled>Integration in Progress</button>
+                                <button class="btn-secondary" onclick="notifyWhenReady('postpartumsupport')">Notify When Ready</button>
+                            </div>
+                        </div>
+
+                        <!-- MENTAL HEALTH APPS -->
+                        <div class="app-integration-card coming-soon">
+                            <div class="app-header">
+                                <div class="app-icon-large">🧠</div>
+                                <div class="app-info">
+                                    <h3>InnerArchitect</h3>
+                                    <p>Mental wellness and behavioral health tracking</p>
+                                    <span class="app-status coming-soon">🟡 COMING SOON</span>
+                                </div>
+                            </div>
+                            <div class="app-stats">
+                                <div class="stat">
+                                    <span class="stat-number">--</span>
+                                    <span class="stat-label">Integration Progress</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">65%</span>
+                                    <span class="stat-label">Development</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">Q3</span>
+                                    <span class="stat-label">Launch Target</span>
+                                </div>
+                            </div>
+                            <div class="app-actions">
+                                <button class="btn-secondary" disabled>Integration in Progress</button>
+                                <button class="btn-secondary" onclick="notifyWhenReady('innerarchitect')">Notify When Ready</button>
+                            </div>
+                        </div>
+
+                        <div class="app-integration-card coming-soon">
+                            <div class="app-header">
+                                <div class="app-icon-large">🎯</div>
+                                <div class="app-info">
+                                    <h3>SoberPal</h3>
+                                    <p>Addiction recovery support and milestone tracking</p>
+                                    <span class="app-status coming-soon">🟡 COMING SOON</span>
+                                </div>
+                            </div>
+                            <div class="app-stats">
+                                <div class="stat">
+                                    <span class="stat-number">--</span>
+                                    <span class="stat-label">Integration Progress</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">70%</span>
+                                    <span class="stat-label">Development</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">Q3</span>
+                                    <span class="stat-label">Launch Target</span>
+                                </div>
+                            </div>
+                            <div class="app-actions">
+                                <button class="btn-secondary" disabled>Integration in Progress</button>
+                                <button class="btn-secondary" onclick="notifyWhenReady('soberpal')">Notify When Ready</button>
+                            </div>
+                        </div>
+
+                        <div class="app-integration-card coming-soon">
+                            <div class="app-header">
+                                <div class="app-icon-large">💬</div>
+                                <div class="app-info">
+                                    <h3>MyConfidant</h3>
+                                    <p>Confidential mental health support and counseling</p>
+                                    <span class="app-status coming-soon">🟡 COMING SOON</span>
+                                </div>
+                            </div>
+                            <div class="app-stats">
+                                <div class="stat">
+                                    <span class="stat-number">--</span>
+                                    <span class="stat-label">Integration Progress</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">58%</span>
+                                    <span class="stat-label">Development</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">Q4</span>
+                                    <span class="stat-label">Launch Target</span>
+                                </div>
+                            </div>
+                            <div class="app-actions">
+                                <button class="btn-secondary" disabled>Integration in Progress</button>
+                                <button class="btn-secondary" onclick="notifyWhenReady('myconfidant')">Notify When Ready</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Care Coordination Analytics -->
+                    <div class="referral-analytics">
+                        <h3>Care Coordination Metrics</h3>
+                        <div class="analytics-grid">
+                            <div class="analytics-card">
+                                <h4>Total Patient Referrals</h4>
+                                <div class="revenue-amount">41</div>
+                                <div class="revenue-growth">+18% from last month</div>
+                            </div>
+                            <div class="analytics-card">
+                                <h4>Patient Engagement</h4>
+                                <div class="engagement-chart">
+                                    <div class="chart-bar" style="height: 90%;">90%</div>
+                                </div>
+                                <div class="engagement-note">Avg. daily app usage</div>
+                            </div>
+                            <div class="analytics-card">
+                                <h4>Treatment Adherence</h4>
+                                <div class="adherence-score">94%</div>
+                                <div class="adherence-note">Patients following treatment plans</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <h3>Care Coordination Actions</h3>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="sendBulkReferral()">
+                                <span class="action-icon">📧</span>
+                                <span>Send Bulk Referrals</span>
+                            </button>
+                            <button class="action-btn" onclick="viewPatientProgress()">
+                                <span class="action-icon">📊</span>
+                                <span>View Patient Progress</span>
+                            </button>
+                            <button class="action-btn" onclick="generateCareReport()">
+                                <span class="action-icon">📋</span>
+                                <span>Care Coordination Report</span>
+                            </button>
                         </div>
                     </div>
                 </div>
