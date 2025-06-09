@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provider Login - Dr. Alex AI</title>
+    <link rel="stylesheet" href="login-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="brand-logo">
+                <div class="logo-icon">🤖</div>
+                <h1>Dr. Alex AI</h1>
+                <p>Clinical Intelligence Platform</p>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div class="login-form-container">
+            <div class="login-form">
+                <div class="form-header">
+                    <h2>Provider Login</h2>
+                    <p>Access your clinical intelligence dashboard</p>
+                </div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="email">Medical Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            required 
+                            placeholder="doctor@hospital.com"
+                            autocomplete="email"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required 
+                            placeholder="Enter your secure password"
+                            autocomplete="current-password"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="license">Medical License Number</label>
+                        <input 
+                            type="text" 
+                            id="license" 
+                            name="license" 
+                            required 
+                            placeholder="MD123456789"
+                            pattern="[A-Z]{2}[0-9]{6,10}"
+                            title="Format: MD123456789"
+                        >
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span class="checkmark"></span>
+                            Remember me for 30 days
+                        </label>
+                        <a href="#" class="forgot-password">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="login-btn" id="loginBtn">
+                        <span class="btn-text">Access Dashboard</span>
+                        <span class="btn-loader" style="display: none;">🔄</span>
+                    </button>
+                </form>
+
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="/">Start your subscription</a></p>
+                </div>
+            </div>
+
+            <!-- Security Features -->
+            <div class="security-info">
+                <h3>🔒 Enterprise Security</h3>
+                <ul>
+                    <li>✅ HIPAA Compliant Authentication</li>
+                    <li>✅ Multi-Factor Authentication Available</li>
+                    <li>✅ End-to-End Encryption</li>
+                    <li>✅ Audit Trail Logging</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Demo Credentials -->
+        <div class="demo-credentials">
+            <h4>🧪 Demo Access</h4>
+            <p><strong>Email:</strong> demo@hospital.com</p>
+            <p><strong>Password:</strong> DrAlexDemo2024</p>
+            <p><strong>License:</strong> MD123456789</p>
+            <button onclick="fillDemoCredentials()" class="demo-btn">Use Demo Credentials</button>
+        </div>
+
+        <!-- Subscription Tiers -->
+        <div class="pricing-reminder">
+            <h3>Your Subscription Tier</h3>
+            <div class="tier-cards">
+                <div class="tier-card">
+                    <h4>Essential</h4>
+                    <p class="tier-price">$2,999/month</p>
+                    <p>500 AI queries • Basic EHR integration</p>
+                </div>
+                <div class="tier-card popular">
+                    <h4>Professional</h4>
+                    <p class="tier-price">$9,999/month</p>
+                    <p>2,000 AI queries • Full EHR integration</p>
+                </div>
+                <div class="tier-card">
+                    <h4>Enterprise</h4>
+                    <p class="tier-price">$19,999/month</p>
+                    <p>Unlimited queries • White-label options</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner">🤖</div>
+            <p>Authenticating with Dr. Alex AI...</p>
+        </div>
+    </div>
+
+    <script>
+        // Demo credentials function
+        function fillDemoCredentials() {
+            document.getElementById('email').value = 'demo@hospital.com';
+            document.getElementById('password').value = 'DrAlexDemo2024';
+            document.getElementById('license').value = 'MD123456789';
+        }
+
+        // Handle login form submission
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = loginBtn.querySelector('.btn-text');
+            const btnLoader = loginBtn.querySelector('.btn-loader');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // Show loading state
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline';
+            loginBtn.disabled = true;
+            loadingOverlay.style.display = 'flex';
+            
+            const formData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                license: document.getElementById('license').value,
+                remember: document.getElementById('remember').checked
+            };
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store authentication token
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('providerInfo', JSON.stringify(data.provider));
+                    
+                    // Show success message
+                    showMessage('Authentication successful! Redirecting to dashboard...', 'success');
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/provider-dashboard';
+                    }, 1500);
+                    
+                } else {
+                    throw new Error(data.message || 'Authentication failed');
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage(error.message || 'Login failed. Please check your credentials.', 'error');
+                
+                // Reset button state
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+                loginBtn.disabled = false;
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        // Show messages to user
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            const form = document.querySelector('.login-form');
+            form.insertBefore(messageDiv, form.firstChild);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🤖 Dr. Alex AI Login Page Loaded');
+            
+            const authToken = localStorage.getItem('authToken');
+            if (authToken) {
+                // Verify token is still valid
+                fetch('/api/auth/verify', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/provider-dashboard';
+                    } else {
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('providerInfo');
+                    }
+                })
+                .catch(() => {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('providerInfo');
+                });
+            }
+        });
+
+        // Form validation
+        document.getElementById('email').addEventListener('input', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                this.setCustomValidity('Please enter a valid medical email address');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        document.getElementById('license').addEventListener('input', function() {
+            const license = this.value.toUpperCase();
+            this.value = license;
+            
+            const licenseRegex = /^[A-Z]{2}[0-9]{6,10}$/;
+            if (license && !licenseRegex.test(license)) {
+                this.setCustomValidity('License format: MD123456789');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    </script>
+</body>
+</html>

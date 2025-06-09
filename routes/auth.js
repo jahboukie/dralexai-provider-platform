@@ -153,7 +153,8 @@ router.post('/register', [
 // Provider login
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 1 })
+  body('password').isLength({ min: 1 }),
+  body('license').optional().isLength({ min: 1 })
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -164,7 +165,37 @@ router.post('/login', [
       });
     }
 
-    const { email, password } = req.body;
+    const { email, password, license } = req.body;
+
+    // Demo authentication for testing
+    if (email === 'demo@hospital.com' && password === 'DrAlexDemo2024' && license === 'MD123456789') {
+      const token = jwt.sign(
+        {
+          providerId: 'demo-provider-id',
+          email: 'demo@hospital.com',
+          role: 'provider',
+          tier: 'professional'
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      return res.json({
+        message: 'Demo login successful',
+        provider: {
+          id: 'demo-provider-id',
+          email: 'demo@hospital.com',
+          firstName: 'Dr. Sarah',
+          lastName: 'Johnson',
+          specialty: 'Internal Medicine',
+          organization: 'Demo Hospital',
+          subscriptionTier: 'professional',
+          licenseNumber: 'MD123456789'
+        },
+        token,
+        expiresIn: '24h'
+      });
+    }
 
     // Find provider with practice info
     const providerResult = await db.query(`
@@ -317,6 +348,37 @@ router.get('/profile', async (req, res) => {
     logger.error('Get provider profile error:', error);
     res.status(500).json({
       error: 'Profile retrieval failed'
+    });
+  }
+});
+
+// Verify token
+router.get('/verify', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        error: 'No token provided'
+      });
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    res.json({
+      valid: true,
+      provider: {
+        id: decoded.providerId,
+        email: decoded.email,
+        role: decoded.role,
+        tier: decoded.tier
+      }
+    });
+
+  } catch (error) {
+    res.status(401).json({
+      valid: false,
+      error: 'Invalid token'
     });
   }
 });

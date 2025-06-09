@@ -6,8 +6,8 @@ let chatHistory = [];
 let currentUser = {
     name: 'Dr. Sarah Johnson',
     tier: 'Professional',
-    queriesUsed: 127,
-    queriesLimit: 200
+    queriesUsed: 627,
+    queriesLimit: 2000
 };
 
 // Initialize dashboard when page loads

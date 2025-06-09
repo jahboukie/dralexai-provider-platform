@@ -72,19 +72,19 @@ app.get('/dashboard', (req, res) => {
     },
     pricing: {
       essential: {
-        price: '$299/month',
-        queries: 50,
-        features: ['Basic navigation', 'Simple explanations']
+        price: '$2,999/month',
+        queries: 500,
+        features: ['Advanced clinical decision support', 'Basic EHR integration', 'Crisis detection alerts', '24/7 enterprise support']
       },
       professional: {
-        price: '$999/month', 
-        queries: 200,
-        features: ['Clinical insights', 'Trend analysis', 'Treatment recommendations']
+        price: '$9,999/month', 
+        queries: 2000,
+        features: ['Full EHR integration (Epic, Cerner)', 'Advanced predictive analytics', 'Treatment optimization algorithms', 'Multi-department deployment']
       },
       enterprise: {
-        price: '$1,999/month',
-        queries: 1000,
-        features: ['Emergency assistance', 'Predictive analytics', 'Workflow optimization']
+        price: '$19,999/month',
+        queries: 'unlimited',
+        features: ['Enterprise EHR integration', 'Hospital-wide crisis detection', 'Custom AI model training', 'Dedicated customer success manager', 'White-label deployment']
       }
     },
     endpoints: {
@@ -120,7 +120,12 @@ app.get('/', (req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
-// Provider dashboard route
+// Provider login route
+app.get('/login', (req, res) => {
+  res.sendFile('login.html', { root: 'public' });
+});
+
+// Provider dashboard route (protected)
 app.get('/provider-dashboard', (req, res) => {
   res.sendFile('dashboard.html', { root: 'public' });
 });
