@@ -12,9 +12,11 @@ let currentUser = {
 
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Check authentication first
+    // Check if this is a demo session
+    const demoMode = localStorage.getItem('demoMode');
     const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
+
+    if (!authToken || demoMode === 'true') {
         // For demo purposes, allow access without authentication
         console.log('🔓 Running in demo mode - no authentication required');
         initializeDashboard();
@@ -24,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Verify token is valid
+    // Verify token is valid (only if we have a token)
     fetch('/api/auth/verify', {
         headers: {
             'Authorization': `Bearer ${authToken}`
@@ -32,14 +34,14 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => {
         if (!response.ok) {
-            console.log('🔓 Token invalid - running in demo mode');
+            console.log('🔓 Token invalid - switching to demo mode');
             localStorage.removeItem('authToken');
             localStorage.removeItem('providerInfo');
             initializeDashboard();
             updateUserInfo();
             updateUsageStats();
             setupEventListeners();
-            return;
+            return null;
         }
         return response.json();
     })
@@ -50,16 +52,20 @@ document.addEventListener('DOMContentLoaded', function() {
             updateUserInfo();
             updateUsageStats();
             setupEventListeners();
-        } else {
-            console.log('🔓 Authentication failed - running in demo mode');
+        } else if (data !== null) {
+            console.log('🔓 Authentication failed - switching to demo mode');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('providerInfo');
             initializeDashboard();
             updateUserInfo();
             updateUsageStats();
             setupEventListeners();
         }
     })
-    .catch(() => {
-        console.log('🔓 Auth check failed - running in demo mode');
+    .catch((error) => {
+        console.log('🔓 Auth check failed - switching to demo mode', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('providerInfo');
         initializeDashboard();
         updateUserInfo();
         updateUsageStats();
@@ -78,16 +84,20 @@ function initializeDashboard() {
 // Update user information in the navigation
 function updateUserInfo() {
     const authToken = localStorage.getItem('authToken');
+    const demoMode = localStorage.getItem('demoMode');
     const providerName = document.getElementById('providerName');
     const providerTier = document.getElementById('providerTier');
     const logoutBtn = document.querySelector('.logout-btn');
 
-    if (!authToken) {
+    if (!authToken || demoMode === 'true') {
         // Demo mode
-        providerName.textContent = `${currentUser.name} (Demo Mode)`;
-        providerTier.textContent = `${currentUser.tier} Plan - Demo`;
-        logoutBtn.textContent = 'Login';
-        logoutBtn.onclick = () => window.location.href = '/login';
+        providerName.textContent = `${currentUser.name} (Free Demo)`;
+        providerTier.textContent = `${currentUser.tier} Plan - Demo Mode`;
+        logoutBtn.textContent = 'Exit Demo';
+        logoutBtn.onclick = () => {
+            localStorage.removeItem('demoMode');
+            window.location.href = '/';
+        };
     } else {
         // Authenticated mode
         providerName.textContent = currentUser.name;

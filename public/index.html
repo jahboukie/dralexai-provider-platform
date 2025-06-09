@@ -60,7 +60,7 @@
 
             <!-- Prominent Demo CTA -->
             <div class="hero-cta mb-8">
-                <button class="btn btn-primary btn-large mr-4" onclick="window.location.href='/provider-dashboard'">
+                <button class="btn btn-primary btn-large mr-4" onclick="startFreeDemo()">
                     🚀 Try Free Demo
                 </button>
                 <button class="btn btn-secondary btn-large" onclick="window.location.href='/login'">
@@ -553,6 +553,19 @@
                 });
             });
         });
+
+        // Handle free demo button
+        function startFreeDemo() {
+            // Clear any existing auth tokens to ensure demo mode
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('providerInfo');
+
+            // Add demo flag to indicate this is a demo session
+            localStorage.setItem('demoMode', 'true');
+
+            // Redirect to dashboard
+            window.location.href = '/provider-dashboard';
+        }
     </script>
 </body>
 </html>
