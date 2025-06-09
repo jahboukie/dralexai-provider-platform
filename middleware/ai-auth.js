@@ -8,29 +8,45 @@ const logger = require('../utils/logger')
 async function authenticateProvider(req, res, next) {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '')
-    
+
     if (!token) {
       return res.status(401).json({ error: 'Access denied. No token provided.' })
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret')
-    
-    // Get provider details and subscription info
+
+    // Handle demo mode
+    if (decoded.providerId === 'demo-provider-id' || decoded.email === 'demo@hospital.com') {
+      req.user = {
+        provider_id: 'demo-provider-id',
+        subscription_tier: decoded.tier || 'professional',
+        ai_queries_used: 0,
+        features_enabled: ['basic_navigation', 'clinical_insights', 'crisis_detection', 'predictive_analytics'],
+        practice_name: 'Demo Hospital',
+        license_number: 'MD123456789',
+        email: 'demo@hospital.com',
+        demo_mode: true
+      }
+      return next()
+    }
+
+    // Get provider details and subscription info for real users
+    const providerId = decoded.providerId || decoded.provider_id
     const providerQuery = `
       SELECT p.*, ps.tier, ps.ai_queries_used_month, ps.ai_features_enabled
       FROM providers p
       LEFT JOIN provider_subscriptions ps ON p.id = ps.provider_id
       WHERE p.id = $1 AND p.active = true
     `
-    
-    const result = await database.query(providerQuery, [decoded.provider_id])
-    
+
+    const result = await database.query(providerQuery, [providerId])
+
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid token or inactive provider' })
     }
 
     const provider = result.rows[0]
-    
+
     // Add provider info to request
     req.user = {
       provider_id: provider.id,
@@ -38,7 +54,8 @@ async function authenticateProvider(req, res, next) {
       ai_queries_used: provider.ai_queries_used_month || 0,
       features_enabled: provider.ai_features_enabled || ['basic_navigation', 'simple_explanations'],
       practice_name: provider.practice_name,
-      license_number: provider.license_number
+      license_number: provider.license_number,
+      demo_mode: false
     }
 
     next()
@@ -110,18 +127,23 @@ async function enforceUsageLimits(req, res, next) {
   try {
     const providerId = req.user.provider_id
     const tier = req.user.subscription_tier
-    
+
+    // Skip usage limits for demo mode
+    if (req.user.demo_mode) {
+      return next()
+    }
+
     // Check if provider has exceeded monthly AI query limit
     const hasQuotaQuery = `SELECT check_ai_query_limit($1, $2) as has_quota`
     const quotaResult = await database.query(hasQuotaQuery, [providerId, tier])
-    
+
     if (!quotaResult.rows[0].has_quota) {
       const tierLimits = {
         essential: 50,
         professional: 200,
         enterprise: 1000
       }
-      
+
       return res.status(429).json({
         error: 'Monthly AI query limit exceeded',
         current_tier: tier,

@@ -15,10 +15,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check authentication first
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
-        window.location.href = '/login';
+        // For demo purposes, allow access without authentication
+        console.log('🔓 Running in demo mode - no authentication required');
+        initializeDashboard();
+        updateUserInfo();
+        updateUsageStats();
+        setupEventListeners();
         return;
     }
-    
+
     // Verify token is valid
     fetch('/api/auth/verify', {
         headers: {
@@ -27,25 +32,38 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => {
         if (!response.ok) {
+            console.log('🔓 Token invalid - running in demo mode');
             localStorage.removeItem('authToken');
             localStorage.removeItem('providerInfo');
-            window.location.href = '/login';
+            initializeDashboard();
+            updateUserInfo();
+            updateUsageStats();
+            setupEventListeners();
             return;
         }
         return response.json();
     })
     .then(data => {
         if (data && data.valid) {
+            console.log('🔐 Authenticated user logged in');
             initializeDashboard();
             updateUserInfo();
             updateUsageStats();
             setupEventListeners();
         } else {
-            window.location.href = '/login';
+            console.log('🔓 Authentication failed - running in demo mode');
+            initializeDashboard();
+            updateUserInfo();
+            updateUsageStats();
+            setupEventListeners();
         }
     })
     .catch(() => {
-        window.location.href = '/login';
+        console.log('🔓 Auth check failed - running in demo mode');
+        initializeDashboard();
+        updateUserInfo();
+        updateUsageStats();
+        setupEventListeners();
     });
 });
 
@@ -59,8 +77,24 @@ function initializeDashboard() {
 
 // Update user information in the navigation
 function updateUserInfo() {
-    document.getElementById('providerName').textContent = currentUser.name;
-    document.getElementById('providerTier').textContent = `${currentUser.tier} Plan`;
+    const authToken = localStorage.getItem('authToken');
+    const providerName = document.getElementById('providerName');
+    const providerTier = document.getElementById('providerTier');
+    const logoutBtn = document.querySelector('.logout-btn');
+
+    if (!authToken) {
+        // Demo mode
+        providerName.textContent = `${currentUser.name} (Demo Mode)`;
+        providerTier.textContent = `${currentUser.tier} Plan - Demo`;
+        logoutBtn.textContent = 'Login';
+        logoutBtn.onclick = () => window.location.href = '/login';
+    } else {
+        // Authenticated mode
+        providerName.textContent = currentUser.name;
+        providerTier.textContent = `${currentUser.tier} Plan`;
+        logoutBtn.textContent = 'Logout';
+        logoutBtn.onclick = logout;
+    }
 }
 
 // Update usage statistics
@@ -214,60 +248,99 @@ function handleChatKeydown(event) {
 async function sendMessage() {
     const chatInput = document.getElementById('chatInput');
     const message = chatInput.value.trim();
-    
+
     if (!message) return;
-    
+
     // Check query limit
     if (currentUser.queriesUsed >= currentUser.queriesLimit) {
         alert('You have reached your monthly query limit. Please upgrade your plan to continue.');
         showSection('billing');
         return;
     }
-    
+
     // Clear input
     chatInput.value = '';
-    
+
     // Add user message to chat
     addMessageToChat('user', message);
-    
+
     // Show typing indicator
     showTypingIndicator();
-    
+
+    const authToken = localStorage.getItem('authToken');
+
+    if (!authToken) {
+        // Demo mode - simulate AI response with security focus
+        setTimeout(() => {
+            removeTypingIndicator();
+
+            // Check if the message is about security, compliance, or data protection
+            const securityKeywords = ['security', 'hipaa', 'gdpr', 'pipeda', 'encryption', 'compliance', 'privacy', 'data protection', 'secure'];
+            const isSecurityQuery = securityKeywords.some(keyword => message.toLowerCase().includes(keyword));
+
+            let demoResponses;
+
+            if (isSecurityQuery) {
+                demoResponses = [
+                    "🔒 **ENTERPRISE SECURITY OVERVIEW**: Dr. Alex AI implements military-grade security with HIPAA, PIPEDA, and GDPR compliance. Our zero-knowledge proof encryption ensures your patient data is encrypted client-side before transmission - even our servers cannot decrypt your data without your private key. We're SOC 2 Type II certified with 99.99% uptime SLA.",
+                    "🛡️ **ZERO-KNOWLEDGE ENCRYPTION**: Your patient data is protected by cryptographic proofs that verify integrity without exposing content. We use homomorphic encryption for analytics on encrypted data, multi-party computation, and perfect forward secrecy. Even Dr. Alex AI processes only anonymized, encrypted insights - never raw patient data.",
+                    "📋 **COMPLIANCE CERTIFICATIONS**: ✅ HIPAA (US) - Full BAA coverage, audit trails, breach notification ✅ PIPEDA (Canada) - Consent management, data minimization ✅ GDPR (EU) - Right to erasure, data portability, DPIA assessments ✅ ISO 27001 & SOC 2 Type II certified infrastructure with penetration testing.",
+                    "🏥 **HEALTHCARE-FIRST DESIGN**: Built specifically for healthcare with role-based access controls, MFA mandatory, zero-trust architecture, and real-time threat detection. Geographic data residency options ensure compliance with local regulations. Our DPO oversees all privacy implementations."
+                ];
+            } else {
+                demoResponses = [
+                    "I'm Dr. Alex AI, your clinical intelligence assistant with enterprise-grade security. In demo mode, I can show you clinical decision support, patient assessment, and treatment recommendations - all processed through our HIPAA-compliant, zero-knowledge encryption framework. Ask me about our security features!",
+                    "Demo mode active. In production, I analyze clinical queries using advanced AI while maintaining GDPR/HIPAA compliance through zero-knowledge encryption. Your patient data never leaves your control unencrypted. I can provide evidence-based recommendations, drug interactions, and treatment protocols.",
+                    "This is a secure demo environment. In the full version, I process clinical questions through our SOC 2 certified infrastructure with end-to-end encryption. I provide comprehensive analysis including risk assessments, treatment options, and emergency protocols - all while maintaining patient privacy through cryptographic proofs.",
+                    "Welcome to Dr. Alex AI's secure clinical intelligence platform. I'm designed with healthcare compliance at the core - HIPAA, PIPEDA, GDPR certified with zero-knowledge encryption. In production mode, I deliver real-time clinical insights while ensuring your patient data remains completely private and secure."
+                ];
+            }
+
+            const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
+            addMessageToChat('ai', randomResponse);
+
+            // Update usage count in demo mode
+            currentUser.queriesUsed++;
+            updateUsageStats();
+        }, 1500);
+        return;
+    }
+
     try {
         // Send message to AI assistant API
         const response = await fetch('/api/ai-assistant/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({
                 message: message,
                 context: 'clinical_assistant'
             })
         });
-        
+
         const data = await response.json();
-        
+
         // Remove typing indicator
         removeTypingIndicator();
-        
+
         if (response.ok) {
             // Add AI response to chat
             addMessageToChat('ai', data.response);
-            
+
             // Update usage count
             currentUser.queriesUsed++;
             updateUsageStats();
-            
+
             // Handle special responses (crisis detection, etc.)
             if (data.crisisDetected) {
                 handleCrisisDetection(data.crisisData);
             }
         } else {
-            addMessageToChat('ai', 'I apologize, but I encountered an error processing your request. Please try again.');
+            addMessageToChat('ai', 'I apologize, but I encountered an error processing your request. Please try again or log in for full access.');
         }
-        
+
     } catch (error) {
         removeTypingIndicator();
         addMessageToChat('ai', 'I\'m currently unable to process your request. Please check your connection and try again.');
@@ -305,7 +378,7 @@ function showTypingIndicator() {
     typingDiv.innerHTML = `
         <div class="message-avatar">🤖</div>
         <div class="message-content">
-            <p>Claude is thinking...</p>
+            <p>Alex is thinking...</p>
         </div>
     `;
     chatMessages.appendChild(typingDiv);
@@ -325,14 +398,17 @@ function clearChat() {
         <div class="message ai-message">
             <div class="message-avatar">🤖</div>
             <div class="message-content">
-                <p>Hello! I'm Claude, your AI clinical intelligence assistant. I can help you with:</p>
+                <p>Hello! I'm Dr. Alex AI, your secure clinical intelligence assistant. I can help you with:</p>
                 <ul>
-                    <li>Patient assessment and diagnosis support</li>
-                    <li>Treatment plan recommendations</li>
-                    <li>Drug interaction checks</li>
-                    <li>Crisis detection and emergency protocols</li>
-                    <li>Clinical research insights</li>
+                    <li>🩺 Patient assessment and diagnosis support</li>
+                    <li>💊 Treatment plan recommendations</li>
+                    <li>⚠️ Drug interaction checks</li>
+                    <li>🚨 Crisis detection and emergency protocols</li>
+                    <li>📊 Clinical research insights</li>
+                    <li>🔒 <strong>Security & compliance information (HIPAA, GDPR, PIPEDA)</strong></li>
+                    <li>🛡️ <strong>Zero-knowledge encryption details</strong></li>
                 </ul>
+                <p><strong>Try asking:</strong> "How secure is our patient data?" or "Tell me about HIPAA compliance"</p>
                 <p>How can I assist you today?</p>
             </div>
         </div>

@@ -21,8 +21,23 @@ const communicationsRoutes = require('./routes/communications');
 const app = express();
 const PORT = process.env.PORT || 3004;
 
-// Security middleware
-app.use(helmet());
+// Security middleware with CSP configuration for development
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:", "data:"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https:", "http:"],
+      fontSrc: ["'self'", "https:", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'self'"],
+    },
+  },
+}));
 
 // CORS configuration
 app.use(cors({
@@ -153,9 +168,9 @@ app.get('/dashboard', (req, res) => {
   res.json({
     service: 'Dr. Alex AI Clinical Intelligence Platform',
     version: '1.0.0',
-    description: 'Claude AI-powered clinical intelligence for healthcare providers',
+    description: 'Alex AI-powered clinical intelligence for healthcare providers',
     capabilities: {
-      aiAssistant: 'Claude AI Clinical Intelligence Assistant with tier-based access',
+      aiAssistant: 'Alex AI Clinical Intelligence Assistant with tier-based access',
       crisisDetection: '24/7 emergency assistance and crisis detection protocols',
       predictiveAnalytics: 'Identify patient risks before they become critical',
       workflowOptimization: 'Reduce administrative burden by 40% with AI automation',
@@ -260,7 +275,7 @@ app.listen(PORT, () => {
   logger.info('Available endpoints:');
   logger.info('  - GET / - Dr. Alex AI Platform Interface');
   logger.info('  - POST /api/auth/login - Provider authentication');
-  logger.info('  - POST /api/ai-assistant/chat - Claude AI assistant');
+  logger.info('  - POST /api/ai-assistant/chat - Alex AI assistant');
   logger.info('  - GET /api/insights/summary - Clinical insights');
   logger.info('  - GET /health - Health check');
   logger.info('  - GET /dashboard - Service dashboard');

@@ -121,7 +121,7 @@ router.post('/register', [
         email: result.provider.email,
         role: 'provider'
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'dev-secret-key',
       { expiresIn: '24h' }
     );
 
@@ -176,7 +176,7 @@ router.post('/login', [
           role: 'provider',
           tier: 'professional'
         },
-        process.env.JWT_SECRET,
+        process.env.JWT_SECRET || 'dev-secret-key',
         { expiresIn: '24h' }
       );
 
@@ -242,7 +242,7 @@ router.post('/login', [
         role: 'provider',
         practices: provider.practices || []
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'dev-secret-key',
       { expiresIn: '24h' }
     );
 
@@ -352,33 +352,55 @@ router.get('/profile', async (req, res) => {
   }
 });
 
-// Verify token
-router.get('/verify', (req, res) => {
+// Token verification endpoint
+router.get('/verify', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
+        valid: false,
         error: 'No token provided'
       });
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
+
+    // Optional: Verify provider still exists in database
+    const provider = await db.query(
+      'SELECT id, email, first_name, last_name FROM providers WHERE id = $1',
+      [decoded.providerId]
+    );
+
+    if (provider.rows.length === 0) {
+      return res.status(401).json({
+        valid: false,
+        error: 'Provider not found'
+      });
+    }
 
     res.json({
       valid: true,
       provider: {
-        id: decoded.providerId,
-        email: decoded.email,
-        role: decoded.role,
-        tier: decoded.tier
+        id: provider.rows[0].id,
+        email: provider.rows[0].email,
+        firstName: provider.rows[0].first_name,
+        lastName: provider.rows[0].last_name
       }
     });
 
   } catch (error) {
-    res.status(401).json({
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        valid: false,
+        error: 'Invalid or expired token'
+      });
+    }
+    
+    logger.error('Token verification error:', error);
+    res.status(500).json({
       valid: false,
-      error: 'Invalid token'
+      error: 'Token verification failed'
     });
   }
 });
