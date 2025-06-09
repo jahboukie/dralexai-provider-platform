@@ -16,6 +16,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const demoMode = localStorage.getItem('demoMode');
     const authToken = localStorage.getItem('authToken');
 
+    console.log('🔍 Dashboard initialization:', {
+        demoMode: demoMode,
+        hasAuthToken: !!authToken,
+        hostname: window.location.hostname,
+        environment: window.location.hostname === 'localhost' ? 'development' : 'production'
+    });
+
     if (!authToken || demoMode === 'true') {
         // For demo purposes, allow access without authentication
         console.log('🔓 Running in demo mode - no authentication required');
@@ -766,12 +773,16 @@ window.handleChatKeydown = handleChatKeydown;
 function generateReferralLink(appName) {
     const providerId = currentUser.name.replace(/\s+/g, '').toLowerCase();
     const referralCode = `${providerId}-${appName}-${Date.now()}`;
-    
+
+    // Environment-aware URLs
+    const isProduction = window.location.hostname !== 'localhost';
+    const baseUrl = isProduction ? 'https://apps.dralexai.com' : 'http://localhost';
+
     const links = {
-        menotracker: `http://localhost:3013?ref=${referralCode}&provider=${encodeURIComponent(currentUser.name)}`,
-        supportivepartner: `http://localhost:3021?ref=${referralCode}&provider=${encodeURIComponent(currentUser.name)}`
+        menotracker: `${baseUrl}${isProduction ? '/menotracker' : ':3013'}?ref=${referralCode}&provider=${encodeURIComponent(currentUser.name)}`,
+        supportivepartner: `${baseUrl}${isProduction ? '/supportivepartner' : ':3021'}?ref=${referralCode}&provider=${encodeURIComponent(currentUser.name)}`
     };
-    
+
     const link = links[appName];
     
     // Copy to clipboard
