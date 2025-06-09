@@ -238,7 +238,7 @@ Be professional, accurate, and focus on improving patient outcomes through compr
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-3-opus-20240229',
       max_tokens: 1000,
       system: systemPrompt,
       messages: [
@@ -251,10 +251,13 @@ Be professional, accurate, and focus on improving patient outcomes through compr
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Claude API error: ${response.status} - ${errorText}`);
     throw new Error(`Claude API error: ${response.status}`);
   }
 
   const data = await response.json();
+  console.log('Claude API response received successfully');
   
   return {
     content: data.content[0].text,
