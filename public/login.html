@@ -177,7 +177,12 @@
                     body: JSON.stringify(formData)
                 });
                 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    throw new Error('Server error - unable to process login request');
+                }
                 
                 if (response.ok) {
                     // Store authentication token
@@ -193,13 +198,24 @@
                     }, 1500);
                     
                 } else {
-                    throw new Error(data.message || 'Authentication failed');
+                    // Handle demo mode messaging
+                    if (data.demoMode) {
+                        showMessage(data.message + ' Click "Use Demo Credentials" below to try the platform.', 'warning');
+                    } else {
+                        throw new Error(data.message || 'Authentication failed');
+                    }
                 }
-                
+
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage(error.message || 'Login failed. Please check your credentials.', 'error');
-                
+
+                // Check if it's a server error (HTML response)
+                if (error.message.includes('Unexpected token')) {
+                    showMessage('Service temporarily unavailable. Please use demo credentials to explore the platform.', 'warning');
+                } else {
+                    showMessage(error.message || 'Login failed. Please check your credentials or try demo mode.', 'error');
+                }
+
                 // Reset button state
                 btnText.style.display = 'inline';
                 btnLoader.style.display = 'none';

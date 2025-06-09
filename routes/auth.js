@@ -197,84 +197,109 @@ router.post('/login', [
       });
     }
 
+    // Check if database is available
+    if (!db.pool) {
+      logger.warn('Database not available - only demo login supported');
+      return res.status(401).json({
+        error: 'Service temporarily unavailable',
+        message: 'Please use demo credentials: demo@hospital.com / DrAlexDemo2024 / MD123456789',
+        demoMode: true
+      });
+    }
+
     // Find provider with practice info
-    const providerResult = await db.query(`
-      SELECT 
-        p.*,
-        array_agg(
-          json_build_object(
-            'practiceId', pr.id,
-            'practiceName', pr.practice_name,
-            'role', ppm.role,
-            'permissions', ppm.permissions
-          )
-        ) FILTER (WHERE pr.id IS NOT NULL) as practices
-      FROM providers p
-      LEFT JOIN provider_practice_memberships ppm ON p.id = ppm.provider_id AND ppm.is_active = true
-      LEFT JOIN provider_practices pr ON ppm.practice_id = pr.id AND pr.is_active = true
-      WHERE p.email = $1 AND p.is_active = true
-      GROUP BY p.id
-    `, [email]);
+    try {
+      const providerResult = await db.query(`
+        SELECT
+          p.*,
+          array_agg(
+            json_build_object(
+              'practiceId', pr.id,
+              'practiceName', pr.practice_name,
+              'role', ppm.role,
+              'permissions', ppm.permissions
+            )
+          ) FILTER (WHERE pr.id IS NOT NULL) as practices
+        FROM providers p
+        LEFT JOIN provider_practice_memberships ppm ON p.id = ppm.provider_id AND ppm.is_active = true
+        LEFT JOIN provider_practices pr ON ppm.practice_id = pr.id AND pr.is_active = true
+        WHERE p.email = $1 AND p.is_active = true
+        GROUP BY p.id
+      `, [email]);
 
-    if (providerResult.rows.length === 0) {
-      return res.status(401).json({
-        error: 'Invalid credentials',
-        message: 'Email or password is incorrect'
+      if (providerResult.rows.length === 0) {
+        return res.status(401).json({
+          error: 'Invalid credentials',
+          message: 'Email or password is incorrect'
+        });
+      }
+
+      const provider = providerResult.rows[0];
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, provider.password_hash);
+      if (!isValidPassword) {
+        return res.status(401).json({
+          error: 'Invalid credentials',
+          message: 'Email or password is incorrect'
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          providerId: provider.id,
+          email: provider.email,
+          role: 'provider',
+          practices: provider.practices || []
+        },
+        process.env.JWT_SECRET || 'dev-secret-key',
+        { expiresIn: '24h' }
+      );
+
+      // Update last login (don't fail if this fails)
+      try {
+        await db.query(
+          'UPDATE providers SET last_login = NOW() WHERE id = $1',
+          [provider.id]
+        );
+      } catch (updateError) {
+        logger.warn('Failed to update last login:', updateError);
+      }
+
+      logger.info(`Provider logged in: ${email}`);
+
+      res.json({
+        message: 'Login successful',
+        provider: {
+          id: provider.id,
+          email: provider.email,
+          firstName: provider.first_name,
+          lastName: provider.last_name,
+          specialty: provider.specialty,
+          organization: provider.organization,
+          subscriptionTier: provider.subscription_tier,
+          practices: provider.practices || []
+        },
+        token,
+        expiresIn: '24h'
+      });
+
+    } catch (dbError) {
+      logger.error('Database error during login:', dbError);
+      return res.status(500).json({
+        error: 'Service temporarily unavailable',
+        message: 'Please try again later or use demo credentials',
+        demoMode: true
       });
     }
-
-    const provider = providerResult.rows[0];
-
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, provider.password_hash);
-    if (!isValidPassword) {
-      return res.status(401).json({
-        error: 'Invalid credentials',
-        message: 'Email or password is incorrect'
-      });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      {
-        providerId: provider.id,
-        email: provider.email,
-        role: 'provider',
-        practices: provider.practices || []
-      },
-      process.env.JWT_SECRET || 'dev-secret-key',
-      { expiresIn: '24h' }
-    );
-
-    // Update last login
-    await db.query(
-      'UPDATE providers SET last_login = NOW() WHERE id = $1',
-      [provider.id]
-    );
-
-    logger.info(`Provider logged in: ${email}`);
-
-    res.json({
-      message: 'Login successful',
-      provider: {
-        id: provider.id,
-        email: provider.email,
-        firstName: provider.first_name,
-        lastName: provider.last_name,
-        specialty: provider.specialty,
-        organization: provider.organization,
-        subscriptionTier: provider.subscription_tier,
-        practices: provider.practices || []
-      },
-      token,
-      expiresIn: '24h'
-    });
 
   } catch (error) {
     logger.error('Provider login error:', error);
     res.status(500).json({
       error: 'Login failed',
-      message: 'An error occurred during login'
+      message: 'An error occurred during login. Please try demo mode.',
+      demoMode: true
     });
   }
 });
@@ -364,30 +389,69 @@ router.get('/verify', async (req, res) => {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key');
 
-    // Optional: Verify provider still exists in database
-    const provider = await db.query(
-      'SELECT id, email, first_name, last_name FROM providers WHERE id = $1',
-      [decoded.providerId]
-    );
-
-    if (provider.rows.length === 0) {
-      return res.status(401).json({
-        valid: false,
-        error: 'Provider not found'
+    // For demo mode, skip database verification
+    if (decoded.providerId === 'demo-provider-id') {
+      return res.json({
+        valid: true,
+        provider: {
+          id: 'demo-provider-id',
+          email: 'demo@hospital.com',
+          firstName: 'Dr. Sarah',
+          lastName: 'Johnson'
+        }
       });
     }
 
-    res.json({
-      valid: true,
-      provider: {
-        id: provider.rows[0].id,
-        email: provider.rows[0].email,
-        firstName: provider.rows[0].first_name,
-        lastName: provider.rows[0].last_name
+    // If database is not available, trust the JWT token
+    if (!db.pool) {
+      return res.json({
+        valid: true,
+        provider: {
+          id: decoded.providerId,
+          email: decoded.email,
+          firstName: 'Provider',
+          lastName: 'User'
+        }
+      });
+    }
+
+    // Optional: Verify provider still exists in database
+    try {
+      const provider = await db.query(
+        'SELECT id, email, first_name, last_name FROM providers WHERE id = $1',
+        [decoded.providerId]
+      );
+
+      if (provider.rows.length === 0) {
+        return res.status(401).json({
+          valid: false,
+          error: 'Provider not found'
+        });
       }
-    });
+
+      res.json({
+        valid: true,
+        provider: {
+          id: provider.rows[0].id,
+          email: provider.rows[0].email,
+          firstName: provider.rows[0].first_name,
+          lastName: provider.rows[0].last_name
+        }
+      });
+    } catch (dbError) {
+      logger.warn('Database unavailable during token verification, trusting JWT');
+      res.json({
+        valid: true,
+        provider: {
+          id: decoded.providerId,
+          email: decoded.email,
+          firstName: 'Provider',
+          lastName: 'User'
+        }
+      });
+    }
 
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
@@ -396,7 +460,7 @@ router.get('/verify', async (req, res) => {
         error: 'Invalid or expired token'
       });
     }
-    
+
     logger.error('Token verification error:', error);
     res.status(500).json({
       valid: false,
