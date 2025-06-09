@@ -25,11 +25,11 @@
     },
     {
       "src": "/login",
-      "dest": "/public/login.html"
+      "dest": "/server.js"
     },
     {
       "src": "/provider-dashboard",
-      "dest": "/public/dashboard.html"
+      "dest": "/server.js"
     },
     {
       "src": "/(.*)",
