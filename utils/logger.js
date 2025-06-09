@@ -36,29 +36,15 @@ const format = winston.format.combine(
   )
 );
 
-// Define transports
+// Define transports (Console only for Vercel serverless)
 const transports = [
   new winston.transports.Console({
     format: winston.format.combine(
+      winston.format.timestamp(),
       winston.format.colorize(),
-      winston.format.simple()
-    )
-  }),
-  
-  new winston.transports.File({
-    filename: 'logs/provider-dashboard-error.log',
-    level: 'error',
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.json()
-    )
-  }),
-  
-  new winston.transports.File({
-    filename: 'logs/provider-dashboard-combined.log',
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.json()
+      winston.format.printf(
+        (info) => `${info.timestamp} [PROVIDER] ${info.level}: ${info.message}`
+      )
     )
   })
 ];
@@ -72,12 +58,6 @@ const logger = winston.createLogger({
   exitOnError: false
 });
 
-// Create logs directory if it doesn't exist
-const fs = require('fs');
-const path = require('path');
-const logsDir = path.join(__dirname, '../logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
-}
+// Vercel serverless - no file logging needed
 
 module.exports = logger;
