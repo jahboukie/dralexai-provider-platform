@@ -44,7 +44,7 @@ const TIER_CAPABILITIES = {
 router.post('/chat', [
   enforceUsageLimits,
   body('message').notEmpty().withMessage('Message is required'),
-  body('context').optional().isObject(),
+  body('context').optional(),
   body('session_id').optional().isUUID()
 ], async (req, res) => {
   try {
@@ -56,6 +56,9 @@ router.post('/chat', [
     const { message, context = {}, session_id } = req.body
     const providerId = req.user.provider_id
     const userTier = req.user.subscription_tier || 'essential'
+
+    // Handle context as string or object
+    const contextObj = typeof context === 'string' ? { type: context } : context
 
     // Check tier capabilities and usage limits
     const tierInfo = TIER_CAPABILITIES[userTier]
@@ -71,7 +74,7 @@ router.post('/chat', [
     }
 
     // Process AI request based on intent classification
-    const aiResponse = await processAIRequest(message, context, tierInfo, providerId)
+    const aiResponse = await processAIRequest(message, contextObj, tierInfo, providerId)
     
     // Log usage for billing and analytics
     await logAIUsage(providerId, userTier, message.length, aiResponse.response_type)
