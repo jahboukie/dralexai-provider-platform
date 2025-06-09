@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Alex AI - Provider Dashboard</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-logo">🤖</div>
+                <h1>Dr. Alex AI</h1>
+                <span class="nav-subtitle">Clinical Intelligence Platform</span>
+            </div>
+            <div class="nav-user">
+                <div class="user-info">
+                    <span class="user-name" id="providerName">Dr. Sarah Johnson</span>
+                    <span class="user-tier" id="providerTier">Professional Plan</span>
+                </div>
+                <div class="user-avatar">👩‍⚕️</div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-menu">
+                <div class="menu-item active" onclick="showSection('overview')">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Overview</span>
+                </div>
+                <div class="menu-item" onclick="showSection('ai-assistant')">
+                    <span class="menu-icon">🤖</span>
+                    <span class="menu-text">Claude AI Assistant</span>
+                </div>
+                <div class="menu-item" onclick="showSection('patients')">
+                    <span class="menu-icon">👥</span>
+                    <span class="menu-text">Patient Management</span>
+                </div>
+                <div class="menu-item" onclick="showSection('crisis')">
+                    <span class="menu-icon">🚨</span>
+                    <span class="menu-text">Crisis Detection</span>
+                </div>
+                <div class="menu-item" onclick="showSection('analytics')">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Clinical Analytics</span>
+                </div>
+                <div class="menu-item" onclick="showSection('ehr-integration')">
+                    <span class="menu-icon">🔗</span>
+                    <span class="menu-text">EHR Integration</span>
+                </div>
+                <div class="menu-item" onclick="showSection('billing')">
+                    <span class="menu-icon">💳</span>
+                    <span class="menu-text">Usage & Billing</span>
+                </div>
+                <div class="menu-item" onclick="showSection('settings')">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Settings</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="dashboard-main">
+            
+            <!-- Overview Section -->
+            <section id="overview" class="dashboard-section active">
+                <div class="section-header">
+                    <h2>Dashboard Overview</h2>
+                    <p>Welcome to your Dr. Alex AI Clinical Intelligence Platform</p>
+                </div>
+                
+                <!-- Quick Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🤖</div>
+                        <div class="stat-content">
+                            <h3 id="aiQueriesUsed">127</h3>
+                            <p>AI Queries This Month</p>
+                            <span class="stat-limit">of 200 available</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3 id="activePatients">45</h3>
+                            <p>Active Patients</p>
+                            <span class="stat-trend">+8 this week</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🚨</div>
+                        <div class="stat-content">
+                            <h3 id="crisisAlerts">3</h3>
+                            <p>Crisis Alerts Today</p>
+                            <span class="stat-status">All resolved</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-content">
+                            <h3 id="timeSaved">12.3</h3>
+                            <p>Hours Saved This Week</p>
+                            <span class="stat-trend">AI automation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-section">
+                    <h3>Recent Activity</h3>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon">🤖</div>
+                            <div class="activity-content">
+                                <p><strong>AI Analysis Complete</strong> - Patient: John Smith</p>
+                                <span class="activity-time">5 minutes ago</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">🚨</div>
+                            <div class="activity-content">
+                                <p><strong>Crisis Alert Resolved</strong> - Emergency protocol activated</p>
+                                <span class="activity-time">23 minutes ago</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">📊</div>
+                            <div class="activity-content">
+                                <p><strong>Weekly Report Generated</strong> - 15 patients analyzed</p>
+                                <span class="activity-time">2 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Claude AI Assistant Section -->
+            <section id="ai-assistant" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Claude AI Clinical Assistant</h2>
+                    <p>Get instant clinical intelligence and treatment recommendations</p>
+                </div>
+
+                <div class="ai-chat-container">
+                    <div class="chat-header">
+                        <div class="chat-status">
+                            <span class="status-indicator online"></span>
+                            <span>Claude AI - Ready</span>
+                        </div>
+                        <div class="chat-controls">
+                            <button class="btn-secondary" onclick="clearChat()">Clear Chat</button>
+                            <button class="btn-secondary" onclick="exportChat()">Export</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Welcome message -->
+                        <div class="message ai-message">
+                            <div class="message-avatar">🤖</div>
+                            <div class="message-content">
+                                <p>Hello! I'm Claude, your AI clinical intelligence assistant. I can help you with:</p>
+                                <ul>
+                                    <li>Patient assessment and diagnosis support</li>
+                                    <li>Treatment plan recommendations</li>
+                                    <li>Drug interaction checks</li>
+                                    <li>Crisis detection and emergency protocols</li>
+                                    <li>Clinical research insights</li>
+                                </ul>
+                                <p>How can I assist you today?</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-container">
+                        <div class="input-wrapper">
+                            <textarea 
+                                id="chatInput" 
+                                placeholder="Describe patient symptoms, ask for treatment recommendations, or request clinical insights..."
+                                rows="3"
+                                onkeydown="handleChatKeydown(event)"
+                            ></textarea>
+                            <div class="input-actions">
+                                <button class="btn-primary" onclick="sendMessage()">
+                                    Send Message
+                                </button>
+                            </div>
+                        </div>
+                        <div class="query-usage">
+                            <span id="queriesRemaining">73 queries remaining this month</span>
+                            <a href="#" onclick="showSection('billing')">Upgrade Plan</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Patient Management Section -->
+            <section id="patients" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Patient Management</h2>
+                    <p>Manage patient records and AI analysis results</p>
+                    <button class="btn-primary" onclick="addNewPatient()">Add New Patient</button>
+                </div>
+
+                <div class="patients-container">
+                    <!-- Patient Search and Filters -->
+                    <div class="patients-controls">
+                        <div class="search-box">
+                            <input type="text" placeholder="Search patients..." id="patientSearch">
+                        </div>
+                        <div class="filter-controls">
+                            <select id="patientFilter">
+                                <option value="all">All Patients</option>
+                                <option value="active">Active</option>
+                                <option value="critical">Critical</option>
+                                <option value="recent">Recent Activity</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Patient List -->
+                    <div class="patient-list">
+                        <div class="patient-card" onclick="openPatient('patient-001')">
+                            <div class="patient-avatar">👨</div>
+                            <div class="patient-info">
+                                <h4>John Smith</h4>
+                                <p>Age 45 • Male • ID: #PS-001</p>
+                                <span class="patient-status active">Active Treatment</span>
+                            </div>
+                            <div class="patient-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">Risk Score</span>
+                                    <span class="metric-value low">Low</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Last AI Analysis</span>
+                                    <span class="metric-value">2 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="patient-card" onclick="openPatient('patient-002')">
+                            <div class="patient-avatar">👩</div>
+                            <div class="patient-info">
+                                <h4>Maria Garcia</h4>
+                                <p>Age 62 • Female • ID: #MG-002</p>
+                                <span class="patient-status critical">Requires Attention</span>
+                            </div>
+                            <div class="patient-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">Risk Score</span>
+                                    <span class="metric-value high">High</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Last AI Analysis</span>
+                                    <span class="metric-value">15 minutes ago</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="patient-card" onclick="openPatient('patient-003')">
+                            <div class="patient-avatar">👴</div>
+                            <div class="patient-info">
+                                <h4>Robert Johnson</h4>
+                                <p>Age 71 • Male • ID: #RJ-003</p>
+                                <span class="patient-status monitoring">Monitoring</span>
+                            </div>
+                            <div class="patient-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">Risk Score</span>
+                                    <span class="metric-value medium">Medium</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Last AI Analysis</span>
+                                    <span class="metric-value">1 day ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Crisis Detection Section -->
+            <section id="crisis" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Crisis Detection & Emergency Protocols</h2>
+                    <p>24/7 AI-powered emergency assistance and crisis intervention</p>
+                </div>
+
+                <div class="crisis-dashboard">
+                    <!-- Emergency Status -->
+                    <div class="emergency-status">
+                        <div class="status-card safe">
+                            <div class="status-icon">✅</div>
+                            <div class="status-content">
+                                <h3>All Clear</h3>
+                                <p>No active crisis alerts</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Crisis Alert History -->
+                    <div class="crisis-history">
+                        <h3>Recent Crisis Events</h3>
+                        <div class="crisis-timeline">
+                            <div class="crisis-event resolved">
+                                <div class="event-time">Today, 2:15 PM</div>
+                                <div class="event-content">
+                                    <h4>🚨 Critical Alert - Patient: Maria Garcia</h4>
+                                    <p>AI detected potential cardiac event based on symptoms. Emergency protocol activated.</p>
+                                    <div class="event-actions">
+                                        <span class="action-taken">✅ EMS contacted</span>
+                                        <span class="action-taken">✅ Family notified</span>
+                                        <span class="action-taken">✅ Hospital alerted</span>
+                                    </div>
+                                    <div class="event-status">Status: Resolved - Patient stabilized</div>
+                                </div>
+                            </div>
+
+                            <div class="crisis-event resolved">
+                                <div class="event-time">Yesterday, 11:30 AM</div>
+                                <div class="event-content">
+                                    <h4>⚠️ Moderate Alert - Patient: John Smith</h4>
+                                    <p>Potential medication interaction detected. Immediate review recommended.</p>
+                                    <div class="event-actions">
+                                        <span class="action-taken">✅ Medication adjusted</span>
+                                        <span class="action-taken">✅ Patient counseled</span>
+                                    </div>
+                                    <div class="event-status">Status: Resolved</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Protocols -->
+                    <div class="emergency-protocols">
+                        <h3>Emergency Protocols</h3>
+                        <div class="protocol-list">
+                            <div class="protocol-card">
+                                <h4>🫀 Cardiac Emergency</h4>
+                                <p>Immediate EMS dispatch, hospital notification, family contact</p>
+                                <button class="btn-secondary">View Protocol</button>
+                            </div>
+                            <div class="protocol-card">
+                                <h4>🧠 Neurological Crisis</h4>
+                                <p>Stroke protocol activation, specialized transport, time-critical care</p>
+                                <button class="btn-secondary">View Protocol</button>
+                            </div>
+                            <div class="protocol-card">
+                                <h4>💊 Drug Reaction</h4>
+                                <p>Allergy management, antidote administration, monitoring protocols</p>
+                                <button class="btn-secondary">View Protocol</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EHR Integration Section -->
+            <section id="ehr-integration" class="dashboard-section">
+                <div class="section-header">
+                    <h2>EHR Integration</h2>
+                    <p>Connect with your existing Electronic Health Record systems</p>
+                </div>
+
+                <div class="ehr-container">
+                    <!-- Integration Status -->
+                    <div class="integration-status">
+                        <h3>Connected Systems</h3>
+                        <div class="system-list">
+                            <div class="system-card connected">
+                                <div class="system-logo">🏥</div>
+                                <div class="system-info">
+                                    <h4>Epic MyChart</h4>
+                                    <p>Real-time patient data sync</p>
+                                    <span class="connection-status">Connected</span>
+                                </div>
+                                <div class="system-actions">
+                                    <button class="btn-secondary">Configure</button>
+                                </div>
+                            </div>
+
+                            <div class="system-card available">
+                                <div class="system-logo">🏥</div>
+                                <div class="system-info">
+                                    <h4>Cerner PowerChart</h4>
+                                    <p>Enterprise hospital system integration</p>
+                                    <span class="connection-status">Available</span>
+                                </div>
+                                <div class="system-actions">
+                                    <button class="btn-primary">Connect</button>
+                                </div>
+                            </div>
+
+                            <div class="system-card available">
+                                <div class="system-logo">🏥</div>
+                                <div class="system-info">
+                                    <h4>Allscripts</h4>
+                                    <p>Practice management integration</p>
+                                    <span class="connection-status">Available</span>
+                                </div>
+                                <div class="system-actions">
+                                    <button class="btn-primary">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Sync Status -->
+                    <div class="sync-status">
+                        <h3>Data Synchronization</h3>
+                        <div class="sync-metrics">
+                            <div class="sync-metric">
+                                <span class="metric-label">Last Sync</span>
+                                <span class="metric-value">2 minutes ago</span>
+                            </div>
+                            <div class="sync-metric">
+                                <span class="metric-label">Records Synced Today</span>
+                                <span class="metric-value">1,247</span>
+                            </div>
+                            <div class="sync-metric">
+                                <span class="metric-label">Sync Success Rate</span>
+                                <span class="metric-value">99.8%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Configuration -->
+                    <div class="api-config">
+                        <h3>API Configuration</h3>
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label>EHR System Type</label>
+                                <select>
+                                    <option>Select EHR System</option>
+                                    <option>Epic</option>
+                                    <option>Cerner</option>
+                                    <option>Allscripts</option>
+                                    <option>athenahealth</option>
+                                    <option>Custom FHIR</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>API Endpoint</label>
+                                <input type="text" placeholder="https://your-ehr-system.com/api/fhir">
+                            </div>
+                            <div class="form-group">
+                                <label>Authentication Token</label>
+                                <input type="password" placeholder="Your API authentication token">
+                            </div>
+                            <button class="btn-primary">Test Connection</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Usage & Billing Section -->
+            <section id="billing" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Usage & Billing</h2>
+                    <p>Track your AI usage and manage your subscription</p>
+                </div>
+
+                <div class="billing-container">
+                    <!-- Current Plan -->
+                    <div class="current-plan">
+                        <h3>Current Plan: Professional</h3>
+                        <div class="plan-details">
+                            <div class="plan-price">$999/month</div>
+                            <div class="plan-features">
+                                <span>✅ 200 AI queries per month</span>
+                                <span>✅ Clinical insights & trend analysis</span>
+                                <span>✅ Treatment recommendations</span>
+                                <span>✅ Crisis detection</span>
+                                <span>✅ EHR integration</span>
+                            </div>
+                            <button class="btn-secondary">Upgrade to Enterprise</button>
+                        </div>
+                    </div>
+
+                    <!-- Usage Statistics -->
+                    <div class="usage-stats">
+                        <h3>This Month's Usage</h3>
+                        <div class="usage-chart">
+                            <div class="chart-bar">
+                                <div class="bar-fill" style="width: 63.5%"></div>
+                            </div>
+                            <div class="usage-numbers">
+                                <span>127 of 200 queries used (63.5%)</span>
+                                <span>73 queries remaining</span>
+                            </div>
+                        </div>
+
+                        <div class="usage-breakdown">
+                            <div class="usage-item">
+                                <span>Clinical Analysis</span>
+                                <span>89 queries</span>
+                            </div>
+                            <div class="usage-item">
+                                <span>Crisis Detection</span>
+                                <span>23 queries</span>
+                            </div>
+                            <div class="usage-item">
+                                <span>Treatment Recommendations</span>
+                                <span>15 queries</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Billing History -->
+                    <div class="billing-history">
+                        <h3>Billing History</h3>
+                        <div class="invoice-list">
+                            <div class="invoice-item">
+                                <span class="invoice-date">January 2025</span>
+                                <span class="invoice-amount">$999.00</span>
+                                <span class="invoice-status paid">Paid</span>
+                                <button class="btn-link">Download</button>
+                            </div>
+                            <div class="invoice-item">
+                                <span class="invoice-date">December 2024</span>
+                                <span class="invoice-amount">$999.00</span>
+                                <span class="invoice-status paid">Paid</span>
+                                <button class="btn-link">Download</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                    <p>Configure your Dr. Alex AI platform preferences</p>
+                </div>
+
+                <div class="settings-container">
+                    <!-- Profile Settings -->
+                    <div class="settings-section">
+                        <h3>Profile Settings</h3>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" value="Dr. Sarah Johnson">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" value="sarah.johnson@hospital.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Medical License Number</label>
+                                <input type="text" value="MD123456789">
+                            </div>
+                            <div class="form-group">
+                                <label>Specialty</label>
+                                <select>
+                                    <option>Internal Medicine</option>
+                                    <option>Cardiology</option>
+                                    <option>Emergency Medicine</option>
+                                    <option>Pediatrics</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div class="settings-section">
+                        <h3>Notification Preferences</h3>
+                        <div class="notification-settings">
+                            <div class="setting-item">
+                                <label>Crisis Alerts</label>
+                                <input type="checkbox" checked>
+                                <span>Immediate notifications for emergency situations</span>
+                            </div>
+                            <div class="setting-item">
+                                <label>AI Recommendations</label>
+                                <input type="checkbox" checked>
+                                <span>Treatment and diagnostic suggestions</span>
+                            </div>
+                            <div class="setting-item">
+                                <label>Usage Alerts</label>
+                                <input type="checkbox">
+                                <span>Notify when approaching query limits</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="settings-section">
+                        <h3>Security</h3>
+                        <div class="security-settings">
+                            <button class="btn-secondary">Change Password</button>
+                            <button class="btn-secondary">Enable Two-Factor Auth</button>
+                            <button class="btn-secondary">Download Data</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="dashboard.js"></script>
+</body>
+</html>

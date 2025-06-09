@@ -1,0 +1,1128 @@
+/* Dr. Alex AI Provider Dashboard Styles */
+
+:root {
+    --primary-color: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary-color: #64748b;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --background-color: #f8fafc;
+    --surface-color: #ffffff;
+    --border-color: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --sidebar-width: 280px;
+    --header-height: 70px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Navigation Header */
+.dashboard-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1000;
+}
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 100%;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.brand-logo {
+    font-size: 2rem;
+}
+
+.nav-brand h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.nav-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-info {
+    text-align: right;
+}
+
+.user-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.user-tier {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.logout-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background: var(--background-color);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    display: flex;
+    margin-top: var(--header-height);
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Sidebar */
+.dashboard-sidebar {
+    width: var(--sidebar-width);
+    background: var(--surface-color);
+    border-right: 1px solid var(--border-color);
+    padding: 2rem 0;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0 1rem;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.menu-item:hover {
+    background: var(--background-color);
+}
+
+.menu-item.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.menu-icon {
+    font-size: 1.25rem;
+    width: 24px;
+    text-align: center;
+}
+
+.menu-text {
+    font-size: 0.875rem;
+}
+
+/* Main Content */
+.dashboard-main {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.dashboard-section {
+    display: none;
+}
+
+.dashboard-section.active {
+    display: block;
+}
+
+.section-header {
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.section-header p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-secondary {
+    background: var(--surface-color);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.btn-secondary:hover {
+    background: var(--background-color);
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.875rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    width: 60px;
+    height: 60px;
+    background: var(--background-color);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-content p {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.stat-limit, .stat-trend, .stat-status {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Activity Section */
+.activity-section {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.activity-section h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--background-color);
+    border-radius: 0.5rem;
+}
+
+.activity-icon {
+    font-size: 1.25rem;
+    width: 40px;
+    height: 40px;
+    background: var(--surface-color);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.activity-content p {
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* AI Chat Container */
+.ai-chat-container {
+    background: var(--surface-color);
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success-color);
+}
+
+.chat-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message {
+    display: flex;
+    gap: 1rem;
+    max-width: 80%;
+}
+
+.ai-message {
+    align-self: flex-start;
+}
+
+.user-message {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.user-message .message-avatar {
+    background: var(--secondary-color);
+}
+
+.message-content {
+    background: var(--background-color);
+    padding: 1rem;
+    border-radius: 1rem;
+    line-height: 1.5;
+}
+
+.user-message .message-content {
+    background: var(--primary-color);
+    color: white;
+}
+
+.message-content ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.chat-input-container {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#chatInput {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.875rem;
+}
+
+.input-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.query-usage {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Patient Management */
+.patients-container {
+    background: var(--surface-color);
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.patients-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-box {
+    flex: 1;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.filter-controls select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.patient-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.patient-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--background-color);
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.patient-card:hover {
+    background: #f1f5f9;
+}
+
+.patient-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.patient-info {
+    flex: 1;
+}
+
+.patient-info h4 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.patient-info p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.patient-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.patient-status.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.patient-status.critical {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.patient-status.monitoring {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.patient-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: right;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.metric-value {
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.metric-value.low {
+    color: var(--success-color);
+}
+
+.metric-value.medium {
+    color: var(--warning-color);
+}
+
+.metric-value.high {
+    color: var(--danger-color);
+}
+
+/* Crisis Detection */
+.crisis-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.emergency-status {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.status-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+}
+
+.status-card.safe {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.status-icon {
+    font-size: 2rem;
+}
+
+.status-content h3 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.crisis-history {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.crisis-history h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.crisis-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.crisis-event {
+    padding: 1.5rem;
+    background: var(--background-color);
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--success-color);
+}
+
+.event-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.event-content h4 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.event-content p {
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+}
+
+.event-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.action-taken {
+    background: #f0fdf4;
+    color: #166534;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.event-status {
+    font-weight: 500;
+    color: var(--success-color);
+}
+
+.emergency-protocols {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.emergency-protocols h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.protocol-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.protocol-card {
+    padding: 1.5rem;
+    background: var(--background-color);
+    border-radius: 0.75rem;
+    text-align: center;
+}
+
+.protocol-card h4 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.protocol-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+/* EHR Integration */
+.ehr-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.integration-status {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.integration-status h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.system-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.system-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--background-color);
+    border-radius: 0.75rem;
+}
+
+.system-logo {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.system-info {
+    flex: 1;
+}
+
+.system-info h4 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.system-info p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.connection-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.system-card.connected .connection-status {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.system-card.available .connection-status {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.sync-status, .api-config {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.sync-status h3, .api-config h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.sync-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.sync-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.form-group input, .form-group select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Billing */
+.billing-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.current-plan {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.current-plan h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.plan-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.plan-price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.plan-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.plan-features span {
+    font-size: 0.875rem;
+}
+
+.usage-stats {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.usage-stats h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.usage-chart {
+    margin-bottom: 1rem;
+}
+
+.chart-bar {
+    width: 100%;
+    height: 20px;
+    background: var(--background-color);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.bar-fill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+.usage-numbers {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+}
+
+.usage-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.usage-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: var(--background-color);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.billing-history {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.billing-history h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.invoice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.invoice-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--background-color);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.invoice-status.paid {
+    background: #dcfce7;
+    color: #166534;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 500;
+}
+
+/* Settings */
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.settings-section {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.settings-section h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.settings-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.notification-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--background-color);
+    border-radius: 0.5rem;
+}
+
+.setting-item label {
+    font-weight: 500;
+    min-width: 120px;
+}
+
+.setting-item input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.setting-item span {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.security-settings {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+    
+    .dashboard-sidebar {
+        width: 100%;
+        padding: 1rem;
+    }
+    
+    .sidebar-menu {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 0;
+        gap: 0.25rem;
+    }
+    
+    .menu-item {
+        min-width: max-content;
+        padding: 0.75rem 1rem;
+    }
+    
+    .menu-text {
+        display: none;
+    }
+    
+    .dashboard-main {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-container {
+        padding: 0 1rem;
+    }
+    
+    .nav-brand {
+        gap: 0.5rem;
+    }
+    
+    .nav-brand h1 {
+        font-size: 1.25rem;
+    }
+    
+    .nav-subtitle {
+        display: none;
+    }
+    
+    .user-info {
+        display: none;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .ai-chat-container {
+        height: 500px;
+    }
+    
+    .patients-controls {
+        flex-direction: column;
+    }
+    
+    .protocol-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .sync-metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .settings-form {
+        grid-template-columns: 1fr;
+    }
+}

@@ -120,6 +120,11 @@ app.get('/', (req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
+// Provider dashboard route
+app.get('/provider-dashboard', (req, res) => {
+  res.sendFile('dashboard.html', { root: 'public' });
+});
+
 // 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
