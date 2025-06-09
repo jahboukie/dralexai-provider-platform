@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "dralexai-provider-platform",
   "builds": [
     {
       "src": "server.js",
@@ -28,8 +27,5 @@
       "src": "/(.*)",
       "dest": "/public/$1"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
