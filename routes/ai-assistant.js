@@ -21,22 +21,22 @@ router.use(aiRateLimit)
 // Tier access levels and capabilities
 const TIER_CAPABILITIES = {
   essential: {
-    maxQueries: 50,
-    features: ['basic_navigation', 'simple_explanations'],
-    analytics_depth: 'surface',
-    price: 299
+    maxQueries: 500,
+    features: ['basic_navigation', 'clinical_insights', 'crisis_detection'],
+    analytics_depth: 'basic',
+    price: 2999
   },
   professional: {
-    maxQueries: 200,
-    features: ['basic_navigation', 'simple_explanations', 'clinical_insights', 'trend_analysis'],
-    analytics_depth: 'intermediate',
-    price: 999
+    maxQueries: 2000,
+    features: ['basic_navigation', 'clinical_insights', 'predictive_analytics', 'ehr_integration'],
+    analytics_depth: 'advanced',
+    price: 9999
   },
   enterprise: {
-    maxQueries: 1000,
-    features: ['basic_navigation', 'simple_explanations', 'clinical_insights', 'trend_analysis', 'predictive_analytics', 'emergency_assistance', 'workflow_optimization'],
-    analytics_depth: 'full',
-    price: 1999
+    maxQueries: 999999,
+    features: ['all_features', 'emergency_assistance', 'workflow_optimization', 'custom_training', 'white_label'],
+    analytics_depth: 'unlimited',
+    price: 19999
   }
 }
 
@@ -97,42 +97,113 @@ router.post('/chat', [
 
 // AI-powered data interpretation with revenue protection
 async function processAIRequest(message, context, tierInfo, providerId) {
-  const intent = classifyIntent(message)
-  
-  switch (intent.type) {
-    case 'platform_navigation':
-      return await handleNavigationQuery(message, context, tierInfo)
-      
-    case 'data_interpretation':
-      return await handleDataInterpretation(message, context, tierInfo, providerId)
-      
-    case 'clinical_insights':
-      if (!tierInfo.features.includes('clinical_insights')) {
-        return generateUpgradePrompt('clinical_insights', 'professional')
-      }
-      return await handleClinicalInsights(message, context, tierInfo, providerId)
-      
-    case 'predictive_analytics':
-      if (!tierInfo.features.includes('predictive_analytics')) {
-        return generateUpgradePrompt('predictive_analytics', 'enterprise')
-      }
-      return await handlePredictiveAnalytics(message, context, tierInfo, providerId)
-      
-    case 'emergency_assistance':
-      if (!tierInfo.features.includes('emergency_assistance')) {
-        return generateUpgradePrompt('emergency_assistance', 'enterprise')
-      }
-      return await handleEmergencyAssistance(message, context, tierInfo, providerId)
-      
-    case 'workflow_optimization':
-      if (!tierInfo.features.includes('workflow_optimization')) {
-        return generateUpgradePrompt('workflow_optimization', 'enterprise')
-      }
-      return await handleWorkflowOptimization(message, context, tierInfo, providerId)
-      
-    default:
-      return await handleGeneralQuery(message, context, tierInfo)
+  try {
+    // Call actual Claude AI API
+    const claudeResponse = await callClaudeAI(message, context, tierInfo, providerId);
+    
+    // Detect crisis situations
+    const crisisDetected = detectCrisis(claudeResponse.content);
+    
+    return {
+      message: claudeResponse.content,
+      response_type: crisisDetected ? 'crisis_alert' : 'clinical_assistance',
+      suggestions: claudeResponse.suggestions || [],
+      crisisDetected: crisisDetected,
+      crisisData: crisisDetected ? { severity: 'high', recommendations: ['Contact emergency services'] } : null
+    };
+    
+  } catch (error) {
+    logger.error('Claude AI API error:', error);
+    return {
+      message: "I'm experiencing technical difficulties. Please try again in a moment. For urgent matters, contact your supervisor or emergency services.",
+      response_type: 'error',
+      suggestions: []
+    };
   }
+}
+
+// Call Claude AI API
+async function callClaudeAI(message, context, tierInfo, providerId) {
+  const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+  
+  if (!anthropicApiKey) {
+    throw new Error('Anthropic API key not configured');
+  }
+
+  const systemPrompt = `You are Dr. Alex AI, a clinical intelligence assistant for healthcare providers. 
+
+Current provider tier: ${tierInfo.price === 2999 ? 'Essential' : tierInfo.price === 9999 ? 'Professional' : 'Enterprise'}
+
+Capabilities for this tier:
+- Essential ($2,999/month): Advanced clinical decision support, basic EHR integration, crisis detection
+- Professional ($9,999/month): Full EHR integration, advanced predictive analytics, treatment optimization  
+- Enterprise ($19,999/month): Unlimited queries, hospital-wide crisis detection, custom AI training
+
+Always provide:
+1. Clinical insights based on the provider's question
+2. Actionable recommendations
+3. Risk assessments when relevant
+4. Crisis detection if emergency indicators present
+
+Be professional, accurate, and focus on improving patient outcomes.`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': anthropicApiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-3-sonnet-20240229',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [
+        {
+          role: 'user',
+          content: message
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Claude API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  
+  return {
+    content: data.content[0].text,
+    suggestions: extractSuggestions(data.content[0].text)
+  };
+}
+
+// Detect crisis situations in AI response
+function detectCrisis(response) {
+  const crisisKeywords = [
+    'emergency', 'urgent', 'critical', 'immediate', 'crisis', 'stroke', 
+    'heart attack', 'cardiac arrest', 'respiratory failure', 'sepsis',
+    'anaphylaxis', 'seizure', 'overdose', 'trauma', 'bleeding'
+  ];
+  
+  const lowerResponse = response.toLowerCase();
+  return crisisKeywords.some(keyword => lowerResponse.includes(keyword));
+}
+
+// Extract actionable suggestions from AI response
+function extractSuggestions(response) {
+  const suggestions = [];
+  
+  // Look for numbered lists or bullet points
+  const lines = response.split('\n');
+  lines.forEach(line => {
+    if (line.match(/^\d+\./) || line.match(/^[-•]\s/)) {
+      suggestions.push(line.replace(/^\d+\.\s*|^[-•]\s*/, '').trim());
+    }
+  });
+  
+  return suggestions.slice(0, 3); // Limit to 3 suggestions
 }
 
 // Platform Navigation Assistant
