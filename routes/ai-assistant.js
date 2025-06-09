@@ -12,9 +12,32 @@ const {
   aiRateLimit
 } = require('../middleware/ai-auth')
 
-// Apply authentication and rate limiting to all AI assistant routes
-router.use(authenticateProvider)
-router.use(aiRateLimit)
+// Apply authentication and rate limiting to all AI assistant routes (except demo)
+router.use((req, res, next) => {
+  // Skip authentication for demo mode
+  const authHeader = req.headers.authorization;
+  if (authHeader === 'Bearer demo-token' || req.body?.context?.demo_mode) {
+    req.user = {
+      provider_id: 'demo-user',
+      subscription_tier: 'professional',
+      demo_mode: true
+    };
+    return next();
+  }
+
+  // Apply normal authentication for non-demo requests
+  authenticateProvider(req, res, next);
+});
+
+router.use((req, res, next) => {
+  // Skip rate limiting for demo mode
+  if (req.user?.demo_mode) {
+    return next();
+  }
+
+  // Apply rate limiting for normal users
+  aiRateLimit(req, res, next);
+});
 
 // Claude AI Clinical Intelligence Assistant for Provider Platform
 // Revenue-protected implementation with tier-based access
@@ -575,7 +598,7 @@ function classifyIntent(message) {
 
 async function getMonthlyAIUsage(providerId) {
   // Return mock data for demo mode
-  if (providerId === 'demo-provider-id') {
+  if (providerId === 'demo-provider-id' || providerId === 'demo-user') {
     return 15 // Demo usage count
   }
 
@@ -591,7 +614,7 @@ async function getMonthlyAIUsage(providerId) {
 
 async function logAIUsage(providerId, tier, queryLength, responseType) {
   // Skip database logging for demo mode
-  if (providerId === 'demo-provider-id') {
+  if (providerId === 'demo-provider-id' || providerId === 'demo-user') {
     console.log(`Demo AI usage logged: ${tier} tier, query length: ${queryLength}, type: ${responseType}`)
     return
   }

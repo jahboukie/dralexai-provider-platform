@@ -556,15 +556,13 @@
 
         // Handle free demo button
         function startFreeDemo() {
-            // Clear any existing auth tokens to ensure demo mode
+            // Clear any existing auth tokens to ensure clean demo
             localStorage.removeItem('authToken');
             localStorage.removeItem('providerInfo');
+            localStorage.removeItem('demoMode');
 
-            // Add demo flag to indicate this is a demo session
-            localStorage.setItem('demoMode', 'true');
-
-            // Redirect to dashboard
-            window.location.href = '/provider-dashboard';
+            // Redirect to standalone demo dashboard
+            window.location.href = '/demo-dashboard';
         }
     </script>
 </body>
