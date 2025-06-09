@@ -482,6 +482,144 @@ footer {
     animation: fadeIn 0.6s ease-out;
 }
 
+/* Security Trust Badges */
+.security-trust {
+    background-color: #eff6ff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.trust-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.badge-icon {
+    font-size: 1.25rem;
+}
+
+.badge-text {
+    color: var(--gray-700);
+}
+
+/* Hero CTA Buttons */
+.hero-cta {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+/* Compliance Section */
+.compliance-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.compliance-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.compliance-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.compliance-badge {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.compliance-badge .badge-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.security-differentiator {
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe;
+}
+
+.security-feature {
+    text-align: center;
+    padding: 1rem;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Background Colors */
+.bg-white {
+    background-color: white;
+}
+
+.bg-blue-50 {
+    background-color: #eff6ff;
+}
+
+/* Responsive adjustments for new sections */
+@media (max-width: 768px) {
+    .trust-badge {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .hero-cta {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-large {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .compliance-badges {
+        gap: 0.75rem;
+    }
+
+    .compliance-badge {
+        padding: 0.75rem;
+    }
+
+    .security-differentiator .grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Hover Effects */
 .card:hover {
     transform: translateY(-4px);
