@@ -12,30 +12,14 @@ const {
   aiRateLimit
 } = require('../middleware/ai-auth')
 
-// Apply authentication and rate limiting to all AI assistant routes (except demo)
+// Apply authentication and rate limiting to all AI assistant routes
 router.use((req, res, next) => {
-  // Skip authentication for demo mode
-  const authHeader = req.headers.authorization;
-  if (authHeader === 'Bearer demo-token' || req.body?.context?.demo_mode) {
-    req.user = {
-      provider_id: 'demo-user',
-      subscription_tier: 'professional',
-      demo_mode: true
-    };
-    return next();
-  }
-
-  // Apply normal authentication for non-demo requests
+  // Production-only authentication - no demo mode
   authenticateProvider(req, res, next);
 });
 
 router.use((req, res, next) => {
-  // Skip rate limiting for demo mode
-  if (req.user?.demo_mode) {
-    return next();
-  }
-
-  // Apply rate limiting for normal users
+  // Apply rate limiting for all users
   aiRateLimit(req, res, next);
 });
 

@@ -27,10 +27,7 @@
       "src": "/login",
       "dest": "/server.js"
     },
-    {
-      "src": "/demo-dashboard",
-      "dest": "/server.js"
-    },
+
     {
       "src": "/provider-dashboard",
       "dest": "/server.js"

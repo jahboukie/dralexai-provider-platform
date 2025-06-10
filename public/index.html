@@ -58,13 +58,13 @@
             <h2 class="text-5xl font-bold mb-6">Enterprise Clinical Intelligence Platform</h2>
             <p class="text-xl mb-8">Transform your hospital system with Alex AI. Reduce administrative burden by 40%, improve patient outcomes, and generate $500K+ annual ROI per department.</p>
 
-            <!-- Prominent Demo CTA -->
+            <!-- Provider Access CTA -->
             <div class="hero-cta mb-8">
-                <button class="btn btn-primary btn-large mr-4" onclick="startFreeDemo()">
-                    🚀 Try Free Demo
+                <button class="btn btn-primary btn-large mr-4" onclick="window.location.href='/login'">
+                    🏥 Provider Access
                 </button>
-                <button class="btn btn-secondary btn-large" onclick="window.location.href='/login'">
-                    Provider Login
+                <button class="btn btn-secondary btn-large" onclick="scrollToContact()">
+                    Schedule Consultation
                 </button>
             </div>
 
@@ -356,10 +356,10 @@
         </div>
     </section>
 
-    <!-- AI Chat Demo -->
+    <!-- AI Chat Preview -->
     <section class="bg-gray-100 py-16">
         <div class="container">
-            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Experience Alex AI in Action</h2>
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Alex AI Clinical Intelligence Preview</h2>
             <div class="chat-container">
                 <div class="chat-messages">
                     <div class="message user">
@@ -554,15 +554,16 @@
             });
         });
 
-        // Handle free demo button
-        function startFreeDemo() {
-            // Clear any existing auth tokens to ensure clean demo
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('providerInfo');
-            localStorage.removeItem('demoMode');
-
-            // Redirect to standalone demo dashboard
-            window.location.href = '/demo-dashboard';
+        // Handle consultation scheduling
+        function scrollToContact() {
+            // Scroll to contact section
+            const contactSection = document.querySelector('.contact-section');
+            if (contactSection) {
+                contactSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // Fallback to contact form or email
+                window.location.href = 'mailto:contact@dralexai.com?subject=Schedule Consultation';
+            }
         }
     </script>
 </body>

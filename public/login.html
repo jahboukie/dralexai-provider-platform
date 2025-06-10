@@ -98,14 +98,7 @@
             </div>
         </div>
 
-        <!-- Demo Credentials -->
-        <div class="demo-credentials">
-            <h4>🧪 Demo Access</h4>
-            <p><strong>Email:</strong> demo@hospital.com</p>
-            <p><strong>Password:</strong> DrAlexDemo2024</p>
-            <p><strong>License:</strong> MD123456789</p>
-            <button onclick="fillDemoCredentials()" class="demo-btn">Use Demo Credentials</button>
-        </div>
+        <!-- Demo credentials removed - using separate demo platform -->
 
         <!-- Subscription Tiers -->
         <div class="pricing-reminder">
@@ -139,12 +132,7 @@
     </div>
 
     <script>
-        // Demo credentials function
-        function fillDemoCredentials() {
-            document.getElementById('email').value = 'demo@hospital.com';
-            document.getElementById('password').value = 'DrAlexDemo2024';
-            document.getElementById('license').value = 'MD123456789';
-        }
+        // Demo credentials removed - production authentication only
 
         // Handle login form submission
         async function handleLogin(event) {
@@ -198,12 +186,8 @@
                     }, 1500);
                     
                 } else {
-                    // Handle demo mode messaging
-                    if (data.demoMode) {
-                        showMessage(data.message + ' Click "Use Demo Credentials" below to try the platform.', 'warning');
-                    } else {
-                        throw new Error(data.message || 'Authentication failed');
-                    }
+                    // Handle authentication errors
+                    throw new Error(data.message || 'Authentication failed');
                 }
 
             } catch (error) {
@@ -211,9 +195,9 @@
 
                 // Check if it's a server error (HTML response)
                 if (error.message.includes('Unexpected token')) {
-                    showMessage('Service temporarily unavailable. Please use demo credentials to explore the platform.', 'warning');
+                    showMessage('Service temporarily unavailable. Please try again later.', 'warning');
                 } else {
-                    showMessage(error.message || 'Login failed. Please check your credentials or try demo mode.', 'error');
+                    showMessage(error.message || 'Login failed. Please check your credentials.', 'error');
                 }
 
                 // Reset button state

@@ -15,20 +15,7 @@ async function authenticateProvider(req, res, next) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret')
 
-    // Handle demo mode
-    if (decoded.providerId === 'demo-provider-id' || decoded.email === 'demo@hospital.com') {
-      req.user = {
-        provider_id: 'demo-provider-id',
-        subscription_tier: decoded.tier || 'professional',
-        ai_queries_used: 0,
-        features_enabled: ['basic_navigation', 'clinical_insights', 'crisis_detection', 'predictive_analytics'],
-        practice_name: 'Demo Hospital',
-        license_number: 'MD123456789',
-        email: 'demo@hospital.com',
-        demo_mode: true
-      }
-      return next()
-    }
+    // Production-only authentication - demo mode removed
 
     // Get provider details and subscription info for real users
     const providerId = decoded.providerId || decoded.provider_id

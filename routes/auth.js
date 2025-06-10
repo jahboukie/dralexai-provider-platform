@@ -167,8 +167,7 @@ router.post('/login', [
 
     const { email, password, license } = req.body;
 
-    // TODO: Remove demo authentication for production
-    // Demo authentication removed - only database authentication supported
+    // Production authentication only - database required
 
     // Check if database is available
     if (!db.pool) {
@@ -361,7 +360,7 @@ router.get('/verify', async (req, res) => {
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key');
 
-    // TODO: Remove demo mode verification for production
+    // Production token verification only
 
     // If database is not available, trust the JWT token
     if (!db.pool) {

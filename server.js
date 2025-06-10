@@ -231,10 +231,7 @@ app.get('/login', (req, res) => {
   res.sendFile('login.html', { root: 'public' });
 });
 
-// Demo dashboard route (no authentication required)
-app.get('/demo-dashboard', (req, res) => {
-  res.sendFile('demo-dashboard.html', { root: 'public' });
-});
+// Demo dashboard removed - using separate demo platform
 
 // Provider dashboard route (protected)
 app.get('/provider-dashboard', (req, res) => {
