@@ -17,6 +17,7 @@ const patientsRoutes = require('./routes/patients');
 const practiceRoutes = require('./routes/practice');
 const reportsRoutes = require('./routes/reports');
 const communicationsRoutes = require('./routes/communications');
+const menowellnessRoutes = require('./routes/menowellness-integration');
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -82,6 +83,7 @@ app.use('/api/patients', patientsRoutes);
 app.use('/api/practice', practiceRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/communications', communicationsRoutes);
+app.use('/api/menowellness', menowellnessRoutes);
 
 // Additional dashboard routes
 app.get('/api/crisis-events', (req, res) => {
