@@ -19,6 +19,10 @@ const reportsRoutes = require('./routes/reports');
 const communicationsRoutes = require('./routes/communications');
 const menowellnessRoutes = require('./routes/menowellness-integration');
 const ehrRoutes = require('./routes/ehr');
+const telemedicineRoutes = require('./routes/telemedicine');
+const analyticsRoutes = require('./routes/analytics');
+const supportpartnerRoutes = require('./routes/supportpartner-integration');
+const fhirRoutes = require('./routes/fhir');
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -86,6 +90,10 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/communications', communicationsRoutes);
 app.use('/api/menowellness', menowellnessRoutes);
 app.use('/api/ehr', ehrRoutes);
+app.use('/api/telemedicine', telemedicineRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/supportpartner', supportpartnerRoutes);
+app.use('/api/fhir', fhirRoutes);
 
 // Additional dashboard routes
 app.get('/api/crisis-events', (req, res) => {
