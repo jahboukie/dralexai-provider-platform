@@ -167,43 +167,15 @@ router.post('/login', [
 
     const { email, password, license } = req.body;
 
-    // Demo authentication for testing
-    if (email === 'demo@hospital.com' && password === 'DrAlexDemo2024' && license === 'MD123456789') {
-      const token = jwt.sign(
-        {
-          providerId: 'demo-provider-id',
-          email: 'demo@hospital.com',
-          role: 'provider',
-          tier: 'professional'
-        },
-        process.env.JWT_SECRET || 'dev-secret-key',
-        { expiresIn: '24h' }
-      );
-
-      return res.json({
-        message: 'Demo login successful',
-        provider: {
-          id: 'demo-provider-id',
-          email: 'demo@hospital.com',
-          firstName: 'Dr. Sarah',
-          lastName: 'Johnson',
-          specialty: 'Internal Medicine',
-          organization: 'Demo Hospital',
-          subscriptionTier: 'professional',
-          licenseNumber: 'MD123456789'
-        },
-        token,
-        expiresIn: '24h'
-      });
-    }
+    // TODO: Remove demo authentication for production
+    // Demo authentication removed - only database authentication supported
 
     // Check if database is available
     if (!db.pool) {
-      logger.warn('Database not available - only demo login supported');
-      return res.status(401).json({
+      logger.error('Database not available');
+      return res.status(503).json({
         error: 'Service temporarily unavailable',
-        message: 'Please use demo credentials: demo@hospital.com / DrAlexDemo2024 / MD123456789',
-        demoMode: true
+        message: 'Database connection required for authentication'
       });
     }
 
@@ -289,8 +261,7 @@ router.post('/login', [
       logger.error('Database error during login:', dbError);
       return res.status(500).json({
         error: 'Service temporarily unavailable',
-        message: 'Please try again later or use demo credentials',
-        demoMode: true
+        message: 'Database error occurred. Please try again later.'
       });
     }
 
@@ -298,8 +269,7 @@ router.post('/login', [
     logger.error('Provider login error:', error);
     res.status(500).json({
       error: 'Login failed',
-      message: 'An error occurred during login. Please try demo mode.',
-      demoMode: true
+      message: 'An error occurred during login. Please try again.'
     });
   }
 });
@@ -391,18 +361,7 @@ router.get('/verify', async (req, res) => {
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key');
 
-    // For demo mode, skip database verification
-    if (decoded.providerId === 'demo-provider-id') {
-      return res.json({
-        valid: true,
-        provider: {
-          id: 'demo-provider-id',
-          email: 'demo@hospital.com',
-          firstName: 'Dr. Sarah',
-          lastName: 'Johnson'
-        }
-      });
-    }
+    // TODO: Remove demo mode verification for production
 
     // If database is not available, trust the JWT token
     if (!db.pool) {

@@ -241,6 +241,44 @@ app.get('/provider-dashboard', (req, res) => {
   res.sendFile('dashboard.html', { root: 'public' });
 });
 
+// Dashboard overview API endpoint
+app.get('/api/dashboard/overview', async (req, res) => {
+  try {
+    // TODO: Implement real dashboard statistics from database
+    // For now, return structure that frontend expects
+    res.json({
+      aiQueries: 0,
+      activePatients: 0,
+      crisisAlerts: 0,
+      timeSaved: 0,
+      message: 'Dashboard data will be available once database is connected'
+    });
+  } catch (error) {
+    logger.error('Dashboard overview error:', error);
+    res.status(500).json({
+      error: 'Failed to load dashboard overview',
+      message: 'Database connection required'
+    });
+  }
+});
+
+// Patients API endpoint
+app.get('/api/patients', async (req, res) => {
+  try {
+    // TODO: Implement real patient data from database
+    res.json({
+      patients: [],
+      message: 'Patient data will be available once database is connected'
+    });
+  } catch (error) {
+    logger.error('Patients API error:', error);
+    res.status(500).json({
+      error: 'Failed to load patients',
+      message: 'Database connection required'
+    });
+  }
+});
+
 // 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({

@@ -676,26 +676,45 @@ function getUpgradeBenefits(currentTier) {
 // Helper function implementations
 async function getAnonymizedPatientTrends(providerId, analyticsDepth) {
   try {
-    // Mock data for demonstration - in production this would query actual patient data
-    const mockData = {
-      total_patients: 45,
-      avg_wellness: 6.8,
-      high_risk_count: 7,
-      conditions: analyticsDepth === 'full' ? ['Menopause', 'Depression', 'Anxiety'] : null,
-      avg_adherence: analyticsDepth === 'full' ? 78.5 : null,
-      recent_visits: analyticsDepth === 'full' ? 12 : null
+    // TODO: Implement real patient data aggregation from database
+    // This should query the patients table and aggregate anonymized statistics
+
+    if (!database.pool) {
+      throw new Error('Database connection not available');
     }
-    return mockData
-  } catch (error) {
-    logger.error('Error fetching patient trends:', error)
+
+    // Example query structure for production:
+    // const result = await database.query(`
+    //   SELECT
+    //     COUNT(*) as total_patients,
+    //     AVG(wellness_score) as avg_wellness,
+    //     COUNT(*) FILTER (WHERE risk_level = 'high') as high_risk_count
+    //   FROM patients
+    //   WHERE provider_id = $1 AND is_active = true
+    // `, [providerId]);
+
+    // For now, return empty data until database is implemented
     return {
       total_patients: 0,
       avg_wellness: 0,
       high_risk_count: 0,
       conditions: null,
       avg_adherence: null,
-      recent_visits: null
-    }
+      recent_visits: null,
+      message: 'Patient data will be available once database is connected'
+    };
+
+  } catch (error) {
+    logger.error('Error fetching patient trends:', error);
+    return {
+      total_patients: 0,
+      avg_wellness: 0,
+      high_risk_count: 0,
+      conditions: null,
+      avg_adherence: null,
+      recent_visits: null,
+      error: 'Unable to load patient data'
+    };
   }
 }
 

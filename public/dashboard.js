@@ -3,82 +3,80 @@
 // Global variables
 let currentSection = 'overview';
 let chatHistory = [];
-let currentUser = {
-    name: 'Dr. Sarah Johnson',
-    tier: 'Professional',
-    queriesUsed: 627,
-    queriesLimit: 2000
-};
+let currentUser = null; // Will be loaded from API
 
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if this is a demo session
-    const demoMode = localStorage.getItem('demoMode');
     const authToken = localStorage.getItem('authToken');
 
     console.log('🔍 Dashboard initialization:', {
-        demoMode: demoMode,
         hasAuthToken: !!authToken,
         hostname: window.location.hostname,
         environment: window.location.hostname === 'localhost' ? 'development' : 'production'
     });
 
-    if (!authToken || demoMode === 'true') {
-        // For demo purposes, allow access without authentication
-        console.log('🔓 Running in demo mode - no authentication required');
-        initializeDashboard();
-        updateUserInfo();
-        updateUsageStats();
-        setupEventListeners();
+    if (!authToken) {
+        console.log('🔒 No authentication token - redirecting to login');
+        window.location.href = '/login';
         return;
     }
 
-    // Verify token is valid (only if we have a token)
-    fetch('/api/auth/verify', {
-        headers: {
-            'Authorization': `Bearer ${authToken}`
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            console.log('🔓 Token invalid - switching to demo mode');
+    // Load user profile and initialize dashboard
+    loadUserProfile()
+        .then(() => {
+            initializeDashboard();
+            updateUserInfo();
+            updateUsageStats();
+            setupEventListeners();
+        })
+        .catch(error => {
+            console.error('Failed to load user profile:', error);
             localStorage.removeItem('authToken');
-            localStorage.removeItem('providerInfo');
-            initializeDashboard();
-            updateUserInfo();
-            updateUsageStats();
-            setupEventListeners();
-            return null;
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data && data.valid) {
-            console.log('🔐 Authenticated user logged in');
-            initializeDashboard();
-            updateUserInfo();
-            updateUsageStats();
-            setupEventListeners();
-        } else if (data !== null) {
-            console.log('🔓 Authentication failed - switching to demo mode');
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('providerInfo');
-            initializeDashboard();
-            updateUserInfo();
-            updateUsageStats();
-            setupEventListeners();
-        }
-    })
-    .catch((error) => {
-        console.log('🔓 Auth check failed - switching to demo mode', error);
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('providerInfo');
-        initializeDashboard();
-        updateUserInfo();
-        updateUsageStats();
-        setupEventListeners();
-    });
+            window.location.href = '/login';
+        });
 });
+
+// Load user profile from API
+async function loadUserProfile() {
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+        throw new Error('No authentication token');
+    }
+
+    try {
+        const response = await fetch('/api/auth/profile', {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const userData = await response.json();
+
+        // Set current user from API response
+        currentUser = {
+            id: userData.id,
+            name: `${userData.firstName} ${userData.lastName}`,
+            email: userData.email,
+            tier: userData.subscriptionTier || 'Essential',
+            specialty: userData.specialty,
+            organization: userData.organization,
+            licenseNumber: userData.licenseNumber,
+            queriesUsed: userData.monthlyUsage || 0,
+            queriesLimit: userData.queryLimit || 1000
+        };
+
+        console.log('✅ User profile loaded:', currentUser);
+        return currentUser;
+    } catch (error) {
+        console.error('❌ Failed to load user profile:', error);
+        throw error;
+    }
+}
 
 // Initialize dashboard
 function initializeDashboard() {
@@ -90,28 +88,34 @@ function initializeDashboard() {
 
 // Update user information in the navigation
 function updateUserInfo() {
-    const authToken = localStorage.getItem('authToken');
-    const demoMode = localStorage.getItem('demoMode');
+    if (!currentUser) {
+        console.error('Cannot update user info: currentUser is null');
+        return;
+    }
+
     const providerName = document.getElementById('providerName');
     const providerTier = document.getElementById('providerTier');
     const logoutBtn = document.querySelector('.logout-btn');
 
-    if (!authToken || demoMode === 'true') {
-        // Demo mode
-        providerName.textContent = `${currentUser.name} (Free Demo)`;
-        providerTier.textContent = `${currentUser.tier} Plan - Demo Mode`;
-        logoutBtn.textContent = 'Exit Demo';
-        logoutBtn.onclick = () => {
-            localStorage.removeItem('demoMode');
-            window.location.href = '/';
-        };
-    } else {
-        // Authenticated mode
+    if (providerName) {
         providerName.textContent = currentUser.name;
+    }
+
+    if (providerTier) {
         providerTier.textContent = `${currentUser.tier} Plan`;
+    }
+
+    if (logoutBtn) {
         logoutBtn.textContent = 'Logout';
         logoutBtn.onclick = logout;
     }
+}
+
+// Logout function
+function logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('providerInfo');
+    window.location.href = '/login';
 }
 
 // Update usage statistics
@@ -221,19 +225,37 @@ function loadSectionData(sectionId) {
 }
 
 // Load dashboard overview data
-function loadDashboardOverview() {
-    // Simulate real-time data updates
-    const stats = {
-        aiQueries: currentUser.queriesUsed,
-        activePatients: 45,
-        crisisAlerts: 3,
-        timeSaved: 12.3
-    };
-    
-    document.getElementById('aiQueriesUsed').textContent = stats.aiQueries;
-    document.getElementById('activePatients').textContent = stats.activePatients;
-    document.getElementById('crisisAlerts').textContent = stats.crisisAlerts;
-    document.getElementById('timeSaved').textContent = stats.timeSaved;
+async function loadDashboardOverview() {
+    try {
+        const authToken = localStorage.getItem('authToken');
+        const response = await fetch('/api/dashboard/overview', {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const stats = await response.json();
+
+            // Update dashboard stats with real data
+            const elements = {
+                aiQueriesUsed: document.getElementById('aiQueriesUsed'),
+                activePatients: document.getElementById('activePatients'),
+                crisisAlerts: document.getElementById('crisisAlerts'),
+                timeSaved: document.getElementById('timeSaved')
+            };
+
+            if (elements.aiQueriesUsed) elements.aiQueriesUsed.textContent = stats.aiQueries || 0;
+            if (elements.activePatients) elements.activePatients.textContent = stats.activePatients || 0;
+            if (elements.crisisAlerts) elements.crisisAlerts.textContent = stats.crisisAlerts || 0;
+            if (elements.timeSaved) elements.timeSaved.textContent = stats.timeSaved || 0;
+        } else {
+            console.error('Failed to load dashboard overview');
+        }
+    } catch (error) {
+        console.error('Error loading dashboard overview:', error);
+    }
 }
 
 // Load recent activity
@@ -287,39 +309,8 @@ async function sendMessage() {
     const authToken = localStorage.getItem('authToken');
 
     if (!authToken) {
-        // Demo mode - simulate AI response with security focus
-        setTimeout(() => {
-            removeTypingIndicator();
-
-            // Check if the message is about security, compliance, or data protection
-            const securityKeywords = ['security', 'hipaa', 'gdpr', 'pipeda', 'encryption', 'compliance', 'privacy', 'data protection', 'secure'];
-            const isSecurityQuery = securityKeywords.some(keyword => message.toLowerCase().includes(keyword));
-
-            let demoResponses;
-
-            if (isSecurityQuery) {
-                demoResponses = [
-                    "🔒 **ENTERPRISE SECURITY OVERVIEW**: Dr. Alex AI implements military-grade security with HIPAA, PIPEDA, and GDPR compliance. Our zero-knowledge proof encryption ensures your patient data is encrypted client-side before transmission - even our servers cannot decrypt your data without your private key. We're SOC 2 Type II certified with 99.99% uptime SLA.",
-                    "🛡️ **ZERO-KNOWLEDGE ENCRYPTION**: Your patient data is protected by cryptographic proofs that verify integrity without exposing content. We use homomorphic encryption for analytics on encrypted data, multi-party computation, and perfect forward secrecy. Even Dr. Alex AI processes only anonymized, encrypted insights - never raw patient data.",
-                    "📋 **COMPLIANCE CERTIFICATIONS**: ✅ HIPAA (US) - Full BAA coverage, audit trails, breach notification ✅ PIPEDA (Canada) - Consent management, data minimization ✅ GDPR (EU) - Right to erasure, data portability, DPIA assessments ✅ ISO 27001 & SOC 2 Type II certified infrastructure with penetration testing.",
-                    "🏥 **HEALTHCARE-FIRST DESIGN**: Built specifically for healthcare with role-based access controls, MFA mandatory, zero-trust architecture, and real-time threat detection. Geographic data residency options ensure compliance with local regulations. Our DPO oversees all privacy implementations."
-                ];
-            } else {
-                demoResponses = [
-                    "I'm Dr. Alex AI, your clinical intelligence assistant with enterprise-grade security. In demo mode, I can show you clinical decision support, patient assessment, and treatment recommendations - all processed through our HIPAA-compliant, zero-knowledge encryption framework. Ask me about our security features!",
-                    "Demo mode active. In production, I analyze clinical queries using advanced AI while maintaining GDPR/HIPAA compliance through zero-knowledge encryption. Your patient data never leaves your control unencrypted. I can provide evidence-based recommendations, drug interactions, and treatment protocols.",
-                    "This is a secure demo environment. In the full version, I process clinical questions through our SOC 2 certified infrastructure with end-to-end encryption. I provide comprehensive analysis including risk assessments, treatment options, and emergency protocols - all while maintaining patient privacy through cryptographic proofs.",
-                    "Welcome to Dr. Alex AI's secure clinical intelligence platform. I'm designed with healthcare compliance at the core - HIPAA, PIPEDA, GDPR certified with zero-knowledge encryption. In production mode, I deliver real-time clinical insights while ensuring your patient data remains completely private and secure."
-                ];
-            }
-
-            const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
-            addMessageToChat('ai', randomResponse);
-
-            // Update usage count in demo mode
-            currentUser.queriesUsed++;
-            updateUsageStats();
-        }, 1500);
+        removeTypingIndicator();
+        addMessageToChat('ai', 'Authentication required. Please log in to access Dr. Alex AI.');
         return;
     }
 
