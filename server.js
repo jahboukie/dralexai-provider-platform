@@ -10,6 +10,7 @@ require('dotenv').config();
 const logger = require('./utils/logger');
 const authRoutes = require('./routes/auth');
 const aiAssistantRoutes = require('./routes/ai-assistant');
+const advancedAiRoutes = require('./routes/advanced-ai-assistant');
 const insightsRoutes = require('./routes/insights');
 const billingRoutes = require('./routes/billing');
 const healthRoutes = require('./routes/health');
@@ -82,6 +83,7 @@ app.use('/api/auth', authRoutes);
 
 // Protected routes (require provider authentication)
 app.use('/api/ai-assistant', aiAssistantRoutes);
+app.use('/api/advanced-ai', advancedAiRoutes);
 app.use('/api/insights', insightsRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/patients', patientsRoutes);
