@@ -25,9 +25,22 @@ const sanitizePHI = winston.format((info) => {
     return info;
 });
 
-// Create logs directory if it doesn't exist
-const logDir = path.join(__dirname, '../logs');
-require('fs').mkdirSync(logDir, { recursive: true });
+// Create logs directory if it doesn't exist (skip in serverless environments)
+let logDir = path.join(__dirname, '../logs');
+try {
+    require('fs').mkdirSync(logDir, { recursive: true });
+} catch (error) {
+    // In serverless environments like Vercel, use /tmp for logs
+    if (error.code === 'ENOENT' || error.code === 'EACCES') {
+        logDir = '/tmp/logs';
+        try {
+            require('fs').mkdirSync(logDir, { recursive: true });
+        } catch (tmpError) {
+            // If /tmp also fails, use console only
+            logDir = null;
+        }
+    }
+}
 
 const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
@@ -43,7 +56,7 @@ const logger = winston.createLogger({
         service: 'dr-alex-ai-provider',
         version: '1.0.0'
     },
-    transports: [
+    transports: logDir ? [
         // Error log file
         new winston.transports.File({ 
             filename: path.join(logDir, 'error.log'), 
@@ -70,11 +83,19 @@ const logger = winston.createLogger({
                 winston.format.json()
             )
         })
+    ] : [
+        // Console only for serverless environments
+        new winston.transports.Console({
+            format: winston.format.combine(
+                winston.format.colorize(),
+                winston.format.simple()
+            )
+        })
     ]
 });
 
-// Add console logging in development
-if (process.env.NODE_ENV !== 'production') {
+// Add console logging in development (only if we have file transports)
+if (process.env.NODE_ENV !== 'production' && logDir) {
     logger.add(new winston.transports.Console({
         format: winston.format.combine(
             winston.format.colorize(),
