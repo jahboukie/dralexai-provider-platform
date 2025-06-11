@@ -5,6 +5,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const db = require('../utils/database');
 const logger = require('../utils/logger');
 const { requireProviderAuth } = require('../middleware/auth');
+const { SUBSCRIPTION_TIERS, getTierByName, getAllTiers, validateTierLimits } = require('../config/subscription-tiers');
 
 const router = express.Router();
 
@@ -247,7 +248,7 @@ router.get('/invoices', [
 
 // Update subscription
 router.post('/subscription/update', [
-  body('tier').isIn(['basic', 'professional', 'enterprise']).withMessage('Invalid subscription tier'),
+  body('tier').isIn(['essential', 'professional', 'premium', 'enterprise_essential', 'enterprise_professional', 'enterprise_unlimited']).withMessage('Invalid subscription tier'),
   body('billingCycle').optional().isIn(['monthly', 'annual']).withMessage('Invalid billing cycle')
 ], async (req, res) => {
   try {
@@ -262,55 +263,16 @@ router.post('/subscription/update', [
     const { tier, billingCycle = 'monthly' } = req.body;
     const providerId = req.provider.id;
 
-    // Define subscription tiers
-    const tiers = {
-      basic: {
-        priceMonthly: 299.00,
-        priceAnnual: 2990.00,
-        maxPatients: 50,
-        features: {
-          patient_management: true,
-          basic_reports: true,
-          communication_tools: true,
-          api_access: false,
-          advanced_analytics: false,
-          custom_reports: false
-        }
-      },
-      professional: {
-        priceMonthly: 599.00,
-        priceAnnual: 5990.00,
-        maxPatients: 200,
-        features: {
-          patient_management: true,
-          basic_reports: true,
-          communication_tools: true,
-          api_access: true,
-          advanced_analytics: true,
-          custom_reports: true,
-          multi_provider: true
-        }
-      },
-      enterprise: {
-        priceMonthly: 1499.00,
-        priceAnnual: 14990.00,
-        maxPatients: 1000,
-        features: {
-          patient_management: true,
-          basic_reports: true,
-          communication_tools: true,
-          api_access: true,
-          advanced_analytics: true,
-          custom_reports: true,
-          multi_provider: true,
-          white_label: true,
-          priority_support: true
-        }
-      }
-    };
+    // Get tier configuration from centralized config
+    const tierConfig = getTierByName(tier);
+    if (!tierConfig) {
+      return res.status(400).json({
+        error: 'Invalid subscription tier',
+        message: `Tier '${tier}' is not available`
+      });
+    }
 
-    const newTier = tiers[tier];
-    const price = billingCycle === 'annual' ? newTier.priceAnnual : newTier.priceMonthly;
+    const price = billingCycle === 'annual' ? tierConfig.priceAnnual : tierConfig.priceMonthly;
 
     // Get current subscription
     const currentSubscription = await db.query(
@@ -328,17 +290,20 @@ router.post('/subscription/update', [
 
     // Update subscription in database
     const updateResult = await db.query(`
-      UPDATE provider_subscriptions 
-      SET subscription_tier = $1, billing_cycle = $2, price_per_month = $3, 
-          max_patients = $4, features = $5, updated_at = NOW()
-      WHERE id = $6
+      UPDATE provider_subscriptions
+      SET subscription_tier = $1, billing_cycle = $2, price_per_month = $3,
+          max_patients = $4, max_providers = $5, ai_queries_per_month = $6,
+          features = $7, updated_at = NOW()
+      WHERE id = $8
       RETURNING *
     `, [
       tier,
       billingCycle,
       billingCycle === 'monthly' ? price : price / 12,
-      newTier.maxPatients,
-      JSON.stringify(newTier.features),
+      tierConfig.maxPatients,
+      tierConfig.maxProviders,
+      tierConfig.aiQueriesPerMonth,
+      JSON.stringify(tierConfig.features),
       subscription.id
     ]);
 

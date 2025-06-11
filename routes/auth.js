@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
 
 const db = require('../services/database');
+const { SupabaseAuth, supabase } = require('../config/supabase');
 const logger = require('../services/logger');
 
 const router = express.Router();
@@ -150,11 +151,12 @@ router.post('/register', [
   }
 });
 
-// Provider login
+// Provider login with name + email authentication
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 1 }),
-  body('license').optional().isLength({ min: 1 })
+  body('firstName').trim().isLength({ min: 2, max: 100 }),
+  body('lastName').trim().isLength({ min: 2, max: 100 })
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -165,20 +167,49 @@ router.post('/login', [
       });
     }
 
-    const { email, password, license } = req.body;
+    const { email, password, firstName, lastName } = req.body;
 
-    // Production authentication only - database required
+    // Production authentication - Supabase primary, database fallback
+    if (supabase) {
+      try {
+        const result = await SupabaseAuth.loginProvider(email, password);
 
-    // Check if database is available
+        // Format response for frontend compatibility
+        const response = {
+          message: 'Login successful',
+          provider: {
+            id: result.provider.id,
+            email: result.provider.email,
+            firstName: result.provider.first_name,
+            lastName: result.provider.last_name,
+            specialty: result.provider.specialty,
+            organization: result.provider.organization,
+            subscriptionTier: result.provider.subscription_tier,
+            practices: result.provider.provider_practice_memberships || []
+          },
+          token: result.session.access_token,
+          refreshToken: result.session.refresh_token,
+          expiresIn: '24h'
+        };
+
+        logger.info(`Provider logged in via Supabase: ${email}`);
+        return res.json(response);
+
+      } catch (supabaseError) {
+        logger.warn('Supabase login failed, trying fallback:', supabaseError.message);
+      }
+    }
+
+    // Fallback to database authentication if Supabase fails
     if (!db.pool) {
-      logger.error('Database not available');
+      logger.error('No authentication method available');
       return res.status(503).json({
         error: 'Service temporarily unavailable',
-        message: 'Database connection required for authentication'
+        message: 'Authentication service is currently unavailable'
       });
     }
 
-    // Find provider with practice info
+    // Database fallback authentication
     try {
       const providerResult = await db.query(`
         SELECT
@@ -194,14 +225,17 @@ router.post('/login', [
         FROM providers p
         LEFT JOIN provider_practice_memberships ppm ON p.id = ppm.provider_id AND ppm.is_active = true
         LEFT JOIN provider_practices pr ON ppm.practice_id = pr.id AND pr.is_active = true
-        WHERE p.email = $1 AND p.is_active = true
+        WHERE p.email = $1
+          AND LOWER(p.first_name) = LOWER($2)
+          AND LOWER(p.last_name) = LOWER($3)
+          AND p.is_active = true
         GROUP BY p.id
-      `, [email]);
+      `, [email, firstName, lastName]);
 
       if (providerResult.rows.length === 0) {
         return res.status(401).json({
           error: 'Invalid credentials',
-          message: 'Email or password is incorrect'
+          message: 'Email, name, or password is incorrect'
         });
       }
 
@@ -212,7 +246,7 @@ router.post('/login', [
       if (!isValidPassword) {
         return res.status(401).json({
           error: 'Invalid credentials',
-          message: 'Email or password is incorrect'
+          message: 'Email, name, or password is incorrect'
         });
       }
 
@@ -228,7 +262,7 @@ router.post('/login', [
         { expiresIn: '24h' }
       );
 
-      // Update last login (don't fail if this fails)
+      // Update last login
       try {
         await db.query(
           'UPDATE providers SET last_login = NOW() WHERE id = $1',
@@ -238,7 +272,7 @@ router.post('/login', [
         logger.warn('Failed to update last login:', updateError);
       }
 
-      logger.info(`Provider logged in: ${email}`);
+      logger.info(`Provider logged in via database fallback: ${email}`);
 
       res.json({
         message: 'Login successful',
@@ -257,10 +291,10 @@ router.post('/login', [
       });
 
     } catch (dbError) {
-      logger.error('Database error during login:', dbError);
+      logger.error('Database fallback authentication failed:', dbError);
       return res.status(500).json({
-        error: 'Service temporarily unavailable',
-        message: 'Database error occurred. Please try again later.'
+        error: 'Authentication failed',
+        message: 'Unable to authenticate. Please try again later.'
       });
     }
 
@@ -346,7 +380,7 @@ router.get('/profile', async (req, res) => {
   }
 });
 
-// Token verification endpoint
+// Token verification endpoint with Supabase
 router.get('/verify', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -358,12 +392,69 @@ router.get('/verify', async (req, res) => {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key');
 
-    // Production token verification only
+    // Production JWT verification
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key');
 
-    // If database is not available, trust the JWT token
-    if (!db.pool) {
+
+
+      // Try Supabase token verification if configured
+      if (supabase) {
+        try {
+          const result = await SupabaseAuth.verifySession(token);
+
+          return res.json({
+            valid: true,
+            provider: {
+              id: result.provider.id,
+              email: result.provider.email,
+              firstName: result.provider.first_name,
+              lastName: result.provider.last_name,
+              specialty: result.provider.specialty,
+              organization: result.provider.organization,
+              subscriptionTier: result.provider.subscription_tier
+            }
+          });
+
+        } catch (supabaseError) {
+          logger.warn('Supabase token verification failed, using JWT data:', supabaseError.message);
+        }
+      }
+
+      // If database is available, verify provider exists
+      if (db.pool) {
+        try {
+          const provider = await db.query(
+            'SELECT id, email, first_name, last_name, specialty, organization, subscription_tier FROM providers WHERE id = $1',
+            [decoded.providerId]
+          );
+
+          if (provider.rows.length === 0) {
+            return res.status(401).json({
+              valid: false,
+              error: 'Provider not found'
+            });
+          }
+
+          return res.json({
+            valid: true,
+            provider: {
+              id: provider.rows[0].id,
+              email: provider.rows[0].email,
+              firstName: provider.rows[0].first_name,
+              lastName: provider.rows[0].last_name,
+              specialty: provider.rows[0].specialty,
+              organization: provider.rows[0].organization,
+              subscriptionTier: provider.rows[0].subscription_tier
+            }
+          });
+        } catch (dbError) {
+          logger.warn('Database unavailable during token verification, trusting JWT');
+        }
+      }
+
+      // Trust JWT token if database is unavailable
       return res.json({
         valid: true,
         provider: {
@@ -373,52 +464,18 @@ router.get('/verify', async (req, res) => {
           lastName: 'User'
         }
       });
-    }
 
-    // Optional: Verify provider still exists in database
-    try {
-      const provider = await db.query(
-        'SELECT id, email, first_name, last_name FROM providers WHERE id = $1',
-        [decoded.providerId]
-      );
-
-      if (provider.rows.length === 0) {
+    } catch (jwtError) {
+      if (jwtError.name === 'JsonWebTokenError' || jwtError.name === 'TokenExpiredError') {
         return res.status(401).json({
           valid: false,
-          error: 'Provider not found'
+          error: 'Invalid or expired token'
         });
       }
-
-      res.json({
-        valid: true,
-        provider: {
-          id: provider.rows[0].id,
-          email: provider.rows[0].email,
-          firstName: provider.rows[0].first_name,
-          lastName: provider.rows[0].last_name
-        }
-      });
-    } catch (dbError) {
-      logger.warn('Database unavailable during token verification, trusting JWT');
-      res.json({
-        valid: true,
-        provider: {
-          id: decoded.providerId,
-          email: decoded.email,
-          firstName: 'Provider',
-          lastName: 'User'
-        }
-      });
+      throw jwtError;
     }
 
   } catch (error) {
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        valid: false,
-        error: 'Invalid or expired token'
-      });
-    }
-
     logger.error('Token verification error:', error);
     res.status(500).json({
       valid: false,

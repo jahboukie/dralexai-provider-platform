@@ -82,6 +82,12 @@ app.use('/health', healthRoutes);
 // Authentication routes
 app.use('/api/auth', authRoutes);
 
+// Subscription routes (no auth required for landing page flow)
+app.use('/api/subscription', require('./routes/subscription'));
+
+// Stripe webhook routes (must be before body parser middleware)
+app.use('/api/stripe', require('./routes/stripe-webhook'));
+
 // Protected routes (require provider authentication) - temporarily disabled
 // app.use('/api/ai-assistant', aiAssistantRoutes);
 // app.use('/api/advanced-ai', advancedAiRoutes);
@@ -246,7 +252,7 @@ app.get('/login', (req, res) => {
   res.sendFile('login.html', { root: 'public' });
 });
 
-// Demo dashboard removed - using separate demo platform
+// Production-only routes - demo platform is separate
 
 // Provider dashboard route (protected)
 app.get('/provider-dashboard', (req, res) => {

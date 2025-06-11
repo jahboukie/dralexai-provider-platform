@@ -25,7 +25,7 @@
             <div class="login-form">
                 <div class="form-header">
                     <h2>Provider Login</h2>
-                    <p>Access your clinical intelligence dashboard</p>
+                    <p>Secure access with verified credentials</p>
                 </div>
 
                 <form id="loginForm" onsubmit="handleLogin(event)">
@@ -54,15 +54,26 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="license">Medical License Number</label>
-                        <input 
-                            type="text" 
-                            id="license" 
-                            name="license" 
-                            required 
-                            placeholder="MD123456789"
-                            pattern="[A-Z]{2}[0-9]{6,10}"
-                            title="Format: MD123456789"
+                        <label for="firstName">First Name</label>
+                        <input
+                            type="text"
+                            id="firstName"
+                            name="firstName"
+                            required
+                            placeholder="Dr. John"
+                            autocomplete="given-name"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input
+                            type="text"
+                            id="lastName"
+                            name="lastName"
+                            required
+                            placeholder="Smith"
+                            autocomplete="family-name"
                         >
                     </div>
 
@@ -98,7 +109,7 @@
             </div>
         </div>
 
-        <!-- Demo credentials removed - using separate demo platform -->
+
 
         <!-- Subscription Tiers -->
         <div class="pricing-reminder">
@@ -132,7 +143,7 @@
     </div>
 
     <script>
-        // Demo credentials removed - production authentication only
+
 
         // Handle login form submission
         async function handleLogin(event) {
@@ -152,7 +163,8 @@
             const formData = {
                 email: document.getElementById('email').value,
                 password: document.getElementById('password').value,
-                license: document.getElementById('license').value,
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
                 remember: document.getElementById('remember').checked
             };
             
@@ -261,13 +273,20 @@
             }
         });
 
-        document.getElementById('license').addEventListener('input', function() {
-            const license = this.value.toUpperCase();
-            this.value = license;
-            
-            const licenseRegex = /^[A-Z]{2}[0-9]{6,10}$/;
-            if (license && !licenseRegex.test(license)) {
-                this.setCustomValidity('License format: MD123456789');
+        // Name validation
+        document.getElementById('firstName').addEventListener('input', function() {
+            const name = this.value.trim();
+            if (name.length < 2) {
+                this.setCustomValidity('First name must be at least 2 characters');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        document.getElementById('lastName').addEventListener('input', function() {
+            const name = this.value.trim();
+            if (name.length < 2) {
+                this.setCustomValidity('Last name must be at least 2 characters');
             } else {
                 this.setCustomValidity('');
             }
