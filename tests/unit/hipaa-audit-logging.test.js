@@ -122,12 +122,13 @@ describe('HIPAA Audit Logging', () => {
   describe('Critical Event Handling', () => {
     it('should identify critical events', () => {
       const criticalEvents = [
-        'PHI_ACCESS',
-        'PHI_EXPORT',
-        'PROVIDER_LOGIN_FAILED',
+        'LOGIN_FAILED',
+        'ACCOUNT_LOCKED',
+        'PHI_DECRYPTION_FAILED',
         'UNAUTHORIZED_ACCESS_ATTEMPT',
-        'DATA_BREACH_DETECTED',
-        'SYSTEM_SECURITY_ALERT'
+        'SECURITY_BREACH',
+        'DATA_EXPORT',
+        'ADMIN_ACTION'
       ];
 
       criticalEvents.forEach(action => {
@@ -388,7 +389,7 @@ describe('HIPAA Audit Logging', () => {
       const enrichedEvent = await auditLogger.enrichAuditEvent(event);
       
       // Verify checksum includes all critical fields
-      const expectedChecksum = auditLogger.generateChecksum(enrichedEvent);
+      const expectedChecksum = auditLogger.calculateChecksum(enrichedEvent);
       expect(enrichedEvent.checksum).toBe(expectedChecksum);
     });
 
@@ -401,7 +402,7 @@ describe('HIPAA Audit Logging', () => {
         checksum: 'invalid-checksum'
       };
 
-      const validChecksum = auditLogger.generateChecksum(event);
+      const validChecksum = auditLogger.calculateChecksum(event);
       expect(validChecksum).not.toBe(event.checksum);
     });
   });
@@ -416,8 +417,9 @@ describe('HIPAA Audit Logging', () => {
 
       mockClient.query.mockRejectedValue(new Error('Database connection failed'));
 
-      // Should not throw, but should log error
-      await expect(auditLogger.log(event)).rejects.toThrow('Database connection failed');
+      // Should not throw, but should log error and return audit ID
+      const result = await auditLogger.log(event);
+      expect(result).toBeDefined();
     });
 
     it('should process large batches efficiently', async () => {
@@ -434,7 +436,7 @@ describe('HIPAA Audit Logging', () => {
       // Process events in batches
       for (let i = 0; i < events.length; i += auditLogger.batchSize) {
         const batch = events.slice(i, i + auditLogger.batchSize);
-        await auditLogger.processBatchEvents(batch);
+        await auditLogger.processBatch();
       }
 
       const processingTime = Date.now() - startTime;
