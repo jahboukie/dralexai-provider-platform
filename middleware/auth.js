@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const db = require('../utils/database');
-const logger = require('../utils/logger');
+const db = require('../services/database');
+const logger = require('../services/logger');
 
 /**
  * Middleware to authenticate provider requests

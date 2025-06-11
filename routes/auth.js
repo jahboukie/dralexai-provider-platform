@@ -4,8 +4,8 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
 
-const db = require('../utils/database');
-const logger = require('../utils/logger');
+const db = require('../services/database');
+const logger = require('../services/logger');
 
 const router = express.Router();
 

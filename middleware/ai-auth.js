@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
-const database = require('../utils/database')
-const logger = require('../utils/logger')
+const database = require('../services/database')
+const logger = require('../services/logger')
 
 // AI Assistant Authentication & Revenue Protection Middleware
 // Ensures proper tier access and usage tracking

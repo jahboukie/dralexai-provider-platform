@@ -9,9 +9,10 @@ const ClinicalDecisionEngine = require('../services/clinical-decision-engine');
 const PredictiveAnalyticsEngine = require('../services/predictive-analytics');
 const PHIEncryptionService = require('../services/encryption');
 const auditLogger = require('../services/audit-logger');
-const authenticateProvider = require('../middleware/auth');
+const demoAuth = require('../middleware/demo-auth');
 const logger = require('../services/logger');
 const database = require('../services/database');
+const { ALEX_CLINICAL_SYSTEM_PROMPT, CRISIS_KEYWORDS, EMERGENCY_INDICATORS } = require('../config/alex-clinical-prompt');
 
 // Initialize Claude's revolutionary engines
 const clinicalEngine = new ClinicalDecisionEngine();
@@ -19,7 +20,7 @@ const predictiveEngine = new PredictiveAnalyticsEngine();
 const encryptionService = new PHIEncryptionService();
 
 // Apply authentication to all advanced AI routes
-router.use(authenticateProvider);
+router.use(demoAuth);
 
 /**
  * Revolutionary Clinical Intelligence Consultation

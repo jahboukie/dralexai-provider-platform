@@ -9,13 +9,13 @@ const router = express.Router();
 const database = require('../services/database');
 const PHIEncryptionService = require('../services/encryption');
 const auditLogger = require('../services/audit-logger');
-const authenticateProvider = require('../middleware/auth');
+const demoAuth = require('../middleware/demo-auth');
 const logger = require('../services/logger');
 
 const encryptionService = new PHIEncryptionService();
 
 // Apply authentication to all MenoWellness integration routes
-router.use(authenticateProvider);
+router.use(demoAuth);
 
 /**
  * Link patient to MenoWellness platform

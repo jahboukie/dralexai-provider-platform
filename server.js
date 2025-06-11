@@ -7,23 +7,24 @@ require('dotenv').config();
 // For Node.js 18+, fetch is built-in. For older versions, uncomment the line below:
 // const fetch = require('node-fetch');
 
-const logger = require('./utils/logger');
+const logger = require('./services/logger');
 const authRoutes = require('./routes/auth');
-const aiAssistantRoutes = require('./routes/ai-assistant');
-const advancedAiRoutes = require('./routes/advanced-ai-assistant');
-const insightsRoutes = require('./routes/insights');
-const billingRoutes = require('./routes/billing');
 const healthRoutes = require('./routes/health');
-const patientsRoutes = require('./routes/patients');
-const practiceRoutes = require('./routes/practice');
-const reportsRoutes = require('./routes/reports');
-const communicationsRoutes = require('./routes/communications');
-const menowellnessRoutes = require('./routes/menowellness-integration');
-const ehrRoutes = require('./routes/ehr');
-const telemedicineRoutes = require('./routes/telemedicine');
-const analyticsRoutes = require('./routes/analytics');
-const supportpartnerRoutes = require('./routes/supportpartner-integration');
-const fhirRoutes = require('./routes/fhir');
+// Temporarily disable other routes to test login functionality
+// const aiAssistantRoutes = require('./routes/ai-assistant');
+// const advancedAiRoutes = require('./routes/advanced-ai-assistant');
+// const insightsRoutes = require('./routes/insights');
+// const billingRoutes = require('./routes/billing');
+// const patientsRoutes = require('./routes/patients');
+// const practiceRoutes = require('./routes/practice');
+// const reportsRoutes = require('./routes/reports');
+// const communicationsRoutes = require('./routes/communications');
+// const menowellnessRoutes = require('./routes/menowellness-integration');
+// const ehrRoutes = require('./routes/ehr');
+// const telemedicineRoutes = require('./routes/telemedicine');
+// const analyticsRoutes = require('./routes/analytics');
+// const supportpartnerRoutes = require('./routes/supportpartner-integration');
+// const fhirRoutes = require('./routes/fhir');
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -81,21 +82,21 @@ app.use('/health', healthRoutes);
 // Authentication routes
 app.use('/api/auth', authRoutes);
 
-// Protected routes (require provider authentication)
-app.use('/api/ai-assistant', aiAssistantRoutes);
-app.use('/api/advanced-ai', advancedAiRoutes);
-app.use('/api/insights', insightsRoutes);
-app.use('/api/billing', billingRoutes);
-app.use('/api/patients', patientsRoutes);
-app.use('/api/practice', practiceRoutes);
-app.use('/api/reports', reportsRoutes);
-app.use('/api/communications', communicationsRoutes);
-app.use('/api/menowellness', menowellnessRoutes);
-app.use('/api/ehr', ehrRoutes);
-app.use('/api/telemedicine', telemedicineRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/supportpartner', supportpartnerRoutes);
-app.use('/api/fhir', fhirRoutes);
+// Protected routes (require provider authentication) - temporarily disabled
+// app.use('/api/ai-assistant', aiAssistantRoutes);
+// app.use('/api/advanced-ai', advancedAiRoutes);
+// app.use('/api/insights', insightsRoutes);
+// app.use('/api/billing', billingRoutes);
+// app.use('/api/patients', patientsRoutes);
+// app.use('/api/practice', practiceRoutes);
+// app.use('/api/reports', reportsRoutes);
+// app.use('/api/communications', communicationsRoutes);
+// app.use('/api/menowellness', menowellnessRoutes);
+// app.use('/api/ehr', ehrRoutes);
+// app.use('/api/telemedicine', telemedicineRoutes);
+// app.use('/api/analytics', analyticsRoutes);
+// app.use('/api/supportpartner', supportpartnerRoutes);
+// app.use('/api/fhir', fhirRoutes);
 
 // Additional dashboard routes
 app.get('/api/crisis-events', (req, res) => {
