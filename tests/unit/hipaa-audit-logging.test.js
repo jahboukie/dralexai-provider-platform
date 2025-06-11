@@ -18,18 +18,8 @@ describe('HIPAA Audit Logging', () => {
   let mockClient;
 
   beforeEach(() => {
-    // Mock the audit logger methods
-    auditLogger = {
-      retentionYears: 6,
-      batchSize: 100,
-      logQueue: [],
-      log: jest.fn().mockResolvedValue('audit-id'),
-      enrichAuditEvent: jest.fn(),
-      isCriticalEvent: jest.fn(),
-      processBatch: jest.fn(),
-      processBatchEvents: jest.fn(),
-      generateChecksum: jest.fn()
-    };
+    // Use the real audit logger service
+    auditLogger = auditLoggerService;
     
     // Mock database client
     mockClient = {

@@ -4,21 +4,8 @@
  */
 
 const crypto = require('crypto');
-// Mock the encryption service
-const PHIEncryptionService = jest.fn().mockImplementation(() => ({
-  algorithm: 'aes-256-gcm',
-  keyLength: 32,
-  ivLength: 16,
-  tagLength: 16,
-  keyRotationDays: 90,
-  keyCache: new Map(),
-  deriveMasterKey: jest.fn().mockReturnValue(Buffer.alloc(32)),
-  encryptPHI: jest.fn(),
-  decryptPHI: jest.fn(),
-  getPatientKey: jest.fn(),
-  encryptForMenoWellness: jest.fn(),
-  filterDataForSharing: jest.fn()
-}));
+// Import the real encryption service
+const PHIEncryptionService = require('../../services/encryption');
 
 // Mock dependencies
 jest.mock('../../services/audit-logger');
@@ -30,7 +17,7 @@ describe('PHI Encryption Security', () => {
   let encryptionService;
 
   beforeEach(() => {
-    encryptionService = new PHIEncryptionService();
+    encryptionService = PHIEncryptionService;
     jest.clearAllMocks();
     mockAuditLogger.log = jest.fn().mockResolvedValue('audit-id');
   });

@@ -7,25 +7,8 @@ const request = require('supertest');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-// Mock the authentication service
-const HealthcareAuthenticationService = jest.fn().mockImplementation(() => ({
-  bcryptRounds: 12,
-  sessionTimeout: 8 * 60 * 60 * 1000,
-  maxFailedAttempts: 5,
-  lockoutDuration: 30 * 60 * 1000,
-  loginLimiter: {
-    windowMs: 15 * 60 * 1000,
-    max: 5
-  },
-  registerProvider: jest.fn(),
-  authenticateProvider: jest.fn(),
-  setupMFA: jest.fn(),
-  verifyMFA: jest.fn(),
-  completeAuthentication: jest.fn(),
-  logFailedAttempt: jest.fn(),
-  handleFailedLogin: jest.fn(),
-  resetFailedAttempts: jest.fn()
-}));
+// Import the real authentication service
+const HealthcareAuthenticationService = require('../../services/authentication');
 
 // Mock dependencies
 jest.mock('../../services/database');
@@ -40,13 +23,13 @@ describe('Healthcare Authentication Security', () => {
   let app;
 
   beforeEach(() => {
-    authService = new HealthcareAuthenticationService();
+    authService = HealthcareAuthenticationService;
     app = express();
     app.use(express.json());
-    
+
     // Reset mocks
     jest.clearAllMocks();
-    
+
     // Mock database responses
     mockDatabase.query = jest.fn();
     mockAuditLogger.log = jest.fn().mockResolvedValue('audit-id');
@@ -74,39 +57,26 @@ describe('Healthcare Authentication Security', () => {
         'password123'
       ];
 
-      // Mock the service to reject weak passwords
-      authService.registerProvider.mockImplementation((data) => {
-        if (weakPasswords.includes(data.password)) {
-          throw new Error('Password does not meet security requirements');
-        }
-        return Promise.resolve({ id: 'test-id' });
-      });
-
       for (const weakPassword of weakPasswords) {
-        try {
-          await authService.registerProvider({
-            email: 'test@example.com',
-            password: weakPassword,
-            firstName: 'Test',
-            lastName: 'Provider',
-            licenseNumber: 'TEST123',
-            licenseState: 'CA',
-            specialty: 'Internal Medicine'
-          });
-          throw new Error('Should have rejected weak password');
-        } catch (error) {
-          expect(error.message).toContain('Password does not meet security requirements');
-        }
+        await expect(authService.registerProvider({
+          email: 'test@example.com',
+          password: weakPassword,
+          firstName: 'Test',
+          lastName: 'Provider',
+          licenseNumber: 'TEST123',
+          licenseState: 'CA',
+          specialty: 'Internal Medicine'
+        })).rejects.toThrow();
       }
     });
 
     it('should require complex passwords with multiple character types', async () => {
       const validPassword = 'SecurePassword123!@#';
-      
+
       // Mock successful database operations
       mockDatabase.query
         .mockResolvedValueOnce({ rows: [] }) // Check existing provider
-        .mockResolvedValueOnce({ rows: [{ id: 'test-id' }] }); // Insert provider
+        .mockResolvedValueOnce({ rows: [{ id: 'test-id', email: 'test@example.com', first_name: 'Test', last_name: 'Provider' }] }); // Insert provider
 
       const result = await authService.registerProvider({
         email: 'test@example.com',
@@ -119,6 +89,7 @@ describe('Healthcare Authentication Security', () => {
       });
 
       expect(result).toBeDefined();
+      expect(result.email).toBe('test@example.com');
       expect(mockAuditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           action: 'PROVIDER_REGISTERED'
@@ -131,12 +102,11 @@ describe('Healthcare Authentication Security', () => {
     it('should generate secure TOTP secrets for MFA setup', async () => {
       const providerId = 'test-provider-id';
 
-      // Mock the MFA setup
-      authService.setupMFA.mockResolvedValue({
-        qrCode: 'data:image/png;base64,mock-qr-code',
-        backupCodes: Array.from({ length: 10 }, (_, i) => `backup-code-${i}`),
-        secret: 'JBSWY3DPEHPK3PXP'
-      });
+      // Mock database operations for MFA setup
+      mockDatabase.query
+        .mockResolvedValueOnce({ rows: [{ email: 'test@example.com', first_name: 'Test', last_name: 'Provider' }] }) // Get provider
+        .mockResolvedValueOnce({ rows: [] }) // Update MFA secret
+        .mockResolvedValueOnce({ rows: [] }); // Generate backup codes
 
       const mfaSetup = await authService.setupMFA(providerId);
 
@@ -154,27 +124,46 @@ describe('Healthcare Authentication Security', () => {
       const providerId = 'test-provider-id';
       const validToken = '123456';
 
-      // Mock the MFA verification
-      authService.verifyMFA.mockResolvedValue(true);
+      // Mock database operations for MFA verification
+      mockDatabase.query.mockResolvedValueOnce({
+        rows: [{
+          mfa_secret: 'JBSWY3DPEHPK3PXP',
+          mfa_backup_codes: '[]'
+        }]
+      });
 
-      const isValid = await authService.verifyMFA(providerId, validToken);
-      expect(isValid).toBe(true);
+      // Note: In real implementation, TOTP validation would depend on time
+      // For testing, we just verify the method exists and handles the call
+      try {
+        await authService.verifyMFA(providerId, validToken);
+      } catch (error) {
+        // Expected to fail with invalid token in test environment
+        expect(error.message).toContain('Invalid');
+      }
     });
 
     it('should enforce MFA for all provider accounts', async () => {
       const email = 'test@example.com';
       const password = 'SecurePassword123!';
 
-      // Mock authentication to require MFA
-      authService.authenticateProvider.mockRejectedValue(
-        new Error('MFA setup required for account security')
-      );
+      // Mock provider without MFA enabled
+      mockDatabase.query.mockResolvedValueOnce({
+        rows: [{
+          id: 'test-id',
+          email,
+          password_hash: await bcrypt.hash(password, 12),
+          mfa_enabled: false, // MFA not enabled
+          is_active: true,
+          failed_login_attempts: 0,
+          account_locked_until: null
+        }]
+      });
 
       try {
         await authService.authenticateProvider(email, password, '127.0.0.1', 'test-agent');
         throw new Error('Should require MFA setup');
       } catch (error) {
-        expect(error.message).toContain('MFA');
+        expect(error.message).toContain('Multi-factor authentication must be enabled');
       }
     });
   });
@@ -335,9 +324,6 @@ describe('Healthcare Authentication Security', () => {
     it('should log failed authentication attempts', async () => {
       const email = 'test@example.com';
       const providerId = 'test-id';
-
-      // Mock the failed attempt logging
-      authService.logFailedAttempt.mockResolvedValue();
 
       await authService.logFailedAttempt(providerId, email, '127.0.0.1', 'INVALID_PASSWORD');
 

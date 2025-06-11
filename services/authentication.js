@@ -513,4 +513,4 @@ class HealthcareAuthenticationService {
     }
 }
 
-module.exports = HealthcareAuthenticationService;
+module.exports = new HealthcareAuthenticationService();

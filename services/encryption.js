@@ -356,4 +356,4 @@ class PHIEncryptionService {
     }
 }
 
-module.exports = PHIEncryptionService;
+module.exports = new PHIEncryptionService();
