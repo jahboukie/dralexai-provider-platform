@@ -154,9 +154,7 @@ router.post('/register', [
 // Provider login with name + email authentication
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 1 }),
-  body('firstName').trim().isLength({ min: 2, max: 100 }),
-  body('lastName').trim().isLength({ min: 2, max: 100 })
+  body('password').isLength({ min: 1 })
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -167,7 +165,7 @@ router.post('/login', [
       });
     }
 
-    const { email, password, firstName, lastName } = req.body;
+    const { email, password } = req.body;
 
     // Production authentication - Supabase primary, database fallback
     if (supabase) {
@@ -226,16 +224,14 @@ router.post('/login', [
         LEFT JOIN provider_practice_memberships ppm ON p.id = ppm.provider_id AND ppm.is_active = true
         LEFT JOIN provider_practices pr ON ppm.practice_id = pr.id AND pr.is_active = true
         WHERE p.email = $1
-          AND LOWER(p.first_name) = LOWER($2)
-          AND LOWER(p.last_name) = LOWER($3)
           AND p.is_active = true
         GROUP BY p.id
-      `, [email, firstName, lastName]);
+      `, [email]);
 
       if (providerResult.rows.length === 0) {
         return res.status(401).json({
           error: 'Invalid credentials',
-          message: 'Email, name, or password is incorrect'
+          message: 'Email or password is incorrect'
         });
       }
 

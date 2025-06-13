@@ -8,7 +8,14 @@ const logger = require('./logger');
 
 class DatabaseService {
     constructor() {
-        this.pool = new Pool({
+        // Use DATABASE_URL if available, fallback to individual params
+        const config = process.env.DATABASE_URL ? {
+            connectionString: process.env.DATABASE_URL,
+            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+            max: 20,
+            idleTimeoutMillis: 30000,
+            connectionTimeoutMillis: 2000,
+        } : {
             user: process.env.DB_USER || 'postgres',
             host: process.env.DB_HOST || 'localhost',
             database: process.env.DB_NAME || 'dralexai_provider',
@@ -18,7 +25,9 @@ class DatabaseService {
             max: 20,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 2000,
-        });
+        };
+
+        this.pool = new Pool(config);
 
         // Test connection on startup
         this.testConnection();
