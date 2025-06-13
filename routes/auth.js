@@ -242,7 +242,7 @@ router.post('/login', [
       if (!isValidPassword) {
         return res.status(401).json({
           error: 'Invalid credentials',
-          message: 'Email, name, or password is incorrect'
+          message: 'Email or password is incorrect'
         });
       }
 
