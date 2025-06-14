@@ -8,7 +8,7 @@ const express = require('express')
 const router = express.Router()
 const { body, query, validationResult } = require('express-validator')
 const database = require('../services/database')
-const PHIEncryptionService = require('../services/encryption')
+const encryptionService = require('../services/encryption')
 const auditLogger = require('../services/audit-logger')
 const logger = require('../services/logger')
 const alexClinicalContextManager = require('../utils/alex-clinical-context-manager')
@@ -19,8 +19,6 @@ const {
   enforceUsageLimits,
   aiRateLimit
 } = require('../middleware/ai-auth')
-
-const encryptionService = new PHIEncryptionService()
 
 // Apply authentication and rate limiting to all AI assistant routes
 router.use((req, res, next) => {

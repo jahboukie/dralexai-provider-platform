@@ -1,5 +1,5 @@
 const express = require('express');
-const logger = require('../utils/logger');
+const logger = require('../services/logger');
 
 const router = express.Router();
 
@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
   res.json({
     status: 'healthy',
-    service: 'Provider Dashboard',
+    service: 'Dr. Alex AI Clinical Intelligence Platform',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     version: process.env.npm_package_version || '1.0.0'

@@ -199,11 +199,41 @@ router.post('/login', [
     }
 
     // Fallback to database authentication if Supabase fails
-    if (!db.pool) {
-      logger.error('No authentication method available');
+    if (!db || !db.pool) {
+      logger.warn('Database not available, using demo mode');
+
+      // Demo mode for testing - remove in production
+      if (email === 'demo@dralexai.com' && password === 'demo123') {
+        const demoToken = jwt.sign(
+          {
+            providerId: 'demo-provider-id',
+            email: 'demo@dralexai.com',
+            role: 'provider'
+          },
+          process.env.JWT_SECRET || 'dev-secret-key',
+          { expiresIn: '24h' }
+        );
+
+        return res.json({
+          message: 'Demo login successful',
+          provider: {
+            id: 'demo-provider-id',
+            email: 'demo@dralexai.com',
+            firstName: 'Demo',
+            lastName: 'Provider',
+            specialty: 'Internal Medicine',
+            organization: 'Demo Medical Center',
+            subscriptionTier: 'professional',
+            practices: []
+          },
+          token: demoToken,
+          expiresIn: '24h'
+        });
+      }
+
       return res.status(503).json({
         error: 'Service temporarily unavailable',
-        message: 'Authentication service is currently unavailable'
+        message: 'Authentication service is currently unavailable. Try demo@dralexai.com / demo123 for testing.'
       });
     }
 
@@ -419,7 +449,7 @@ router.get('/verify', async (req, res) => {
       }
 
       // If database is available, verify provider exists
-      if (db.pool) {
+      if (db && db.pool) {
         try {
           const provider = await db.query(
             'SELECT id, email, first_name, last_name, specialty, organization, subscription_tier FROM providers WHERE id = $1',

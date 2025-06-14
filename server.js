@@ -2,24 +2,30 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
 // For Node.js 18+, fetch is built-in. For older versions, uncomment the line below:
 // const fetch = require('node-fetch');
 
-const logger = require('./services/logger');
+// const logger = require('./services/logger');
+const logger = {
+  info: console.log,
+  error: console.error,
+  warn: console.warn
+};
 const authRoutes = require('./routes/auth');
 const healthRoutes = require('./routes/health');
-// Temporarily disable other routes to test login functionality
-// const aiAssistantRoutes = require('./routes/ai-assistant');
-// const advancedAiRoutes = require('./routes/advanced-ai-assistant');
-// const insightsRoutes = require('./routes/insights');
-// const billingRoutes = require('./routes/billing');
-// const patientsRoutes = require('./routes/patients');
-// const practiceRoutes = require('./routes/practice');
-// const reportsRoutes = require('./routes/reports');
-// const communicationsRoutes = require('./routes/communications');
-// const menowellnessRoutes = require('./routes/menowellness-integration');
+// Core route imports
+const aiAssistantRoutes = require('./routes/ai-assistant');
+const advancedAiRoutes = require('./routes/advanced-ai-assistant');
+const insightsRoutes = require('./routes/insights');
+const billingRoutes = require('./routes/billing');
+const patientsRoutes = require('./routes/patients');
+const practiceRoutes = require('./routes/practice');
+const reportsRoutes = require('./routes/reports');
+const communicationsRoutes = require('./routes/communications');
+const menowellnessRoutes = require('./routes/menowellness-integration');
 // const ehrRoutes = require('./routes/ehr');
 // const telemedicineRoutes = require('./routes/telemedicine');
 // const analyticsRoutes = require('./routes/analytics');
@@ -27,7 +33,7 @@ const healthRoutes = require('./routes/health');
 // const fhirRoutes = require('./routes/fhir');
 
 const app = express();
-const PORT = process.env.PORT || 3004;
+const PORT = process.env.PORT || 9999;
 
 // Security middleware with CSP configuration for development
 app.use(helmet({
@@ -88,16 +94,29 @@ app.use('/api/subscription', require('./routes/subscription'));
 // Stripe webhook routes (must be before body parser middleware)
 app.use('/api/stripe', require('./routes/stripe-webhook'));
 
-// Protected routes (require provider authentication) - temporarily disabled
-// app.use('/api/ai-assistant', aiAssistantRoutes);
-// app.use('/api/advanced-ai', advancedAiRoutes);
-// app.use('/api/insights', insightsRoutes);
-// app.use('/api/billing', billingRoutes);
-// app.use('/api/patients', patientsRoutes);
-// app.use('/api/practice', practiceRoutes);
-// app.use('/api/reports', reportsRoutes);
-// app.use('/api/communications', communicationsRoutes);
-// app.use('/api/menowellness', menowellnessRoutes);
+// Login page routes
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/provider-login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/provider-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Protected routes (require provider authentication)
+app.use('/api/ai-assistant', aiAssistantRoutes);
+app.use('/api/advanced-ai', advancedAiRoutes);
+app.use('/api/insights', insightsRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/patients', patientsRoutes);
+app.use('/api/practice', practiceRoutes);
+app.use('/api/reports', reportsRoutes);
+app.use('/api/communications', communicationsRoutes);
+app.use('/api/menowellness', menowellnessRoutes);
 // app.use('/api/ehr', ehrRoutes);
 // app.use('/api/telemedicine', telemedicineRoutes);
 // app.use('/api/analytics', analyticsRoutes);
@@ -247,17 +266,7 @@ app.get('/', (req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
-// Provider login route
-app.get('/login', (req, res) => {
-  res.sendFile('login.html', { root: 'public' });
-});
-
 // Production-only routes - demo platform is separate
-
-// Provider dashboard route (protected)
-app.get('/provider-dashboard', (req, res) => {
-  res.sendFile('dashboard.html', { root: 'public' });
-});
 
 // Dashboard overview API endpoint
 app.get('/api/dashboard/overview', async (req, res) => {
@@ -330,16 +339,22 @@ process.on('SIGINT', () => {
 });
 
 app.listen(PORT, () => {
-  logger.info(`🤖 Dr. Alex AI Clinical Intelligence Platform running on port ${PORT}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  logger.info(`Frontend: https://dralexai.com or http://localhost:${PORT}`);
-  logger.info('Available endpoints:');
-  logger.info('  - GET / - Dr. Alex AI Platform Interface');
-  logger.info('  - POST /api/auth/login - Provider authentication');
-  logger.info('  - POST /api/ai-assistant/chat - Alex AI assistant');
-  logger.info('  - GET /api/insights/summary - Clinical insights');
-  logger.info('  - GET /health - Health check');
-  logger.info('  - GET /dashboard - Service dashboard');
+  console.log('='.repeat(80));
+  console.log('🤖 DR. ALEX AI CLINICAL INTELLIGENCE PLATFORM');
+  console.log('='.repeat(80));
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Frontend: https://dralexai.com or http://localhost:${PORT}`);
+  console.log('📋 Available endpoints:');
+  console.log('  - GET / - Dr. Alex AI Platform Interface');
+  console.log('  - POST /api/auth/login - Provider authentication');
+  console.log('  - POST /api/ai-assistant/chat - Alex AI assistant');
+  console.log('  - GET /api/insights/summary - Clinical insights');
+  console.log('  - GET /health - Health check');
+  console.log('  - GET /dashboard - Service dashboard');
+  console.log('='.repeat(80));
+  console.log('✅ DR. ALEX AI SERVER SUCCESSFULLY STARTED');
+  console.log('='.repeat(80));
 });
 
 module.exports = app;

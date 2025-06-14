@@ -15,10 +15,13 @@ class HIPAAAuditLogger {
         this.batchTimeout = 5000; // 5 seconds
         this.logQueue = [];
         this.processingBatch = false;
-        
-        // Start batch processing
-        this.startBatchProcessor();
-        
+        this.batchInterval = null;
+
+        // Start batch processing only in non-test environments
+        if (process.env.NODE_ENV !== 'test') {
+            this.startBatchProcessor();
+        }
+
         // Audit log integrity
         this.integritySecret = process.env.AUDIT_INTEGRITY_SECRET || 'audit-integrity-key';
     }
@@ -123,11 +126,26 @@ class HIPAAAuditLogger {
      * Start batch processor for efficient database writes
      */
     startBatchProcessor() {
-        setInterval(async () => {
+        // Skip in test environment
+        if (process.env.NODE_ENV === 'test') {
+            return;
+        }
+
+        this.batchInterval = setInterval(async () => {
             if (this.logQueue.length > 0 && !this.processingBatch) {
                 await this.processBatch();
             }
         }, this.batchTimeout);
+    }
+
+    /**
+     * Stop batch processor (for cleanup)
+     */
+    stopBatchProcessor() {
+        if (this.batchInterval) {
+            clearInterval(this.batchInterval);
+            this.batchInterval = null;
+        }
     }
 
     /**

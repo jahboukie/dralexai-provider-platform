@@ -3,7 +3,7 @@ const { body, query, validationResult } = require('express-validator');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const db = require('../utils/database');
-const logger = require('../utils/logger');
+const logger = require('../services/logger');
 const { requireProviderAuth } = require('../middleware/auth');
 const { SUBSCRIPTION_TIERS, getTierByName, getAllTiers, validateTierLimits } = require('../config/subscription-tiers');
 

@@ -3,7 +3,7 @@ const { body, query, validationResult } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
 
 const db = require('../utils/database');
-const logger = require('../utils/logger');
+const logger = require('../services/logger');
 const { requireProviderAuth, requirePermission } = require('../middleware/auth');
 
 const router = express.Router();

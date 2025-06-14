@@ -7,15 +7,13 @@
 const express = require('express');
 const router = express.Router();
 const database = require('../services/database');
-const PHIEncryptionService = require('../services/encryption');
+const encryptionService = require('../services/encryption');
 const auditLogger = require('../services/audit-logger');
-const demoAuth = require('../middleware/demo-auth');
+const { requireProviderAuth } = require('../middleware/auth');
 const logger = require('../services/logger');
 
-const encryptionService = new PHIEncryptionService();
-
 // Apply authentication to all patient routes
-router.use(demoAuth);
+router.use(requireProviderAuth);
 
 /**
  * Get all patients for provider with search and filtering

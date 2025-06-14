@@ -8,7 +8,7 @@ const { body, validationResult } = require('express-validator');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const db = require('../utils/database');
-const logger = require('../utils/logger');
+const logger = require('../services/logger');
 const { SUBSCRIPTION_TIERS, getTierByName, getAllTiers } = require('../config/subscription-tiers');
 
 const router = express.Router();

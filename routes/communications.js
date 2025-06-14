@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 
 const db = require('../utils/database');
-const logger = require('../utils/logger');
+const logger = require('../services/logger');
 const { requireProviderAuth } = require('../middleware/auth');
 
 const router = express.Router();

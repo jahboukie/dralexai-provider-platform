@@ -6,7 +6,7 @@
 const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const db = require('../utils/database');
-const logger = require('../utils/logger');
+const logger = require('../services/logger');
 const { getTierByName } = require('../config/subscription-tiers');
 
 const router = express.Router();
