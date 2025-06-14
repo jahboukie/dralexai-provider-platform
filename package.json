@@ -16,7 +16,9 @@
     "migrate:status": "node database/migrate.js status",
     "audit:security": "npm audit --audit-level moderate",
     "lint": "eslint . --ext .js",
-    "lint:fix": "eslint . --ext .js --fix"
+    "lint:fix": "eslint . --ext .js --fix",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel"
   },
   "keywords": [
     "healthcare",
