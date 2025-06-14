@@ -37,9 +37,5 @@
       "src": "/(.*)",
       "dest": "/public/$1"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "ENCRYPTION_MASTER_KEY": "@encryption_master_key"
-  }
+  ]
 }
