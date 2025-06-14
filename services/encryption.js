@@ -33,9 +33,13 @@ class PHIEncryptionService {
     deriveMasterKey() {
         const masterSecret = process.env.ENCRYPTION_MASTER_KEY;
         if (!masterSecret) {
-            throw new Error('ENCRYPTION_MASTER_KEY environment variable required');
+            // Demo mode - use a default key for development/demo purposes
+            console.warn('⚠️  Using demo encryption key - NOT FOR PRODUCTION USE');
+            const demoSecret = 'demo-dr-alex-ai-encryption-key-not-for-production-use-only';
+            const salt = process.env.ENCRYPTION_SALT || 'dr-alex-ai-hipaa-salt';
+            return crypto.pbkdf2Sync(demoSecret, salt, 100000, 32, 'sha512');
         }
-        
+
         const salt = process.env.ENCRYPTION_SALT || 'dr-alex-ai-hipaa-salt';
         return crypto.pbkdf2Sync(masterSecret, salt, 100000, 32, 'sha512');
     }
@@ -254,7 +258,7 @@ class PHIEncryptionService {
      * Generate sharing key for cross-platform data exchange
      */
     generateShareKey(patientId, platform) {
-        const shareSecret = `${patientId}_${platform}_${process.env.SHARE_SECRET}`;
+        const shareSecret = `${patientId}_${platform}_${process.env.SHARE_SECRET || 'demo-share-secret'}`;
         return crypto.pbkdf2Sync(shareSecret, this.masterKey, 50000, this.keyLength, 'sha512');
     }
 
